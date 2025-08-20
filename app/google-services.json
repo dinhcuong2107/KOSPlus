@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "503992766086",
+    "firebase_url": "https://cm-store-69aa3-default-rtdb.firebaseio.com",
+    "project_id": "cm-store-69aa3",
+    "storage_bucket": "cm-store-69aa3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:503992766086:android:90e6c71c47978f18620b07",
+        "android_client_info": {
+          "package_name": "com.example.cmstore"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6mQ1YqU5OWUdEqAtBj8rckt4866sHmEE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:503992766086:android:13ffc0b423e5d1cd620b07",
+        "android_client_info": {
+          "package_name": "com.example.kosplus"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6mQ1YqU5OWUdEqAtBj8rckt4866sHmEE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:503992766086:android:e4553c9bc927970c620b07",
+        "android_client_info": {
+          "package_name": "com.example.mystore"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6mQ1YqU5OWUdEqAtBj8rckt4866sHmEE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

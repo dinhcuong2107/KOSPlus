@@ -16,9 +16,11 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.databinding.DataBindingUtil;
 
 import com.example.kosplus.databinding.ActivitySplassScreenBinding;
+import com.example.kosplus.features.CartsActivity;
+import com.example.kosplus.features.OrdersManageActivity;
+import com.example.kosplus.features.ShopsManageActivity;
 
 public class SplassScreenActivity extends AppCompatActivity {
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,6 +68,5 @@ public class SplassScreenActivity extends AppCompatActivity {
             startActivity(new Intent(this, LoginActivity.class));
             finish();
         }, 3000);
-
     }
 }

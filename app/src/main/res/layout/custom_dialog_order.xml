@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:padding="10dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/custom_background_border"
+        android:padding="10dp"
+        android:orientation="vertical"
+        android:gravity="center"
+        tools:layout_editor_absoluteX="20dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <ImageButton
+                android:id="@+id/cancel"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/custom_background_button_cancel"
+                android:src="@drawable/rounded_close_24"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textSize="18dp"
+                android:textStyle="bold"
+                android:textColor="@color/color_title"
+                android:text="Chi tiết đơn hàng"/>
+
+            <ImageButton
+                android:id="@+id/favorite"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                app:tint="#FF0000"
+                android:background="@drawable/custom_background_button_cancel"
+                android:src="@drawable/rounded_star_24"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/text_order_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name" />
+        <TextView
+            android:id="@+id/text_order_address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="adress"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/textUserName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="name"/>
+            <TextView
+                android:id="@+id/textUserPhone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:text="phone"/>
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/textNote"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ghi chú:\nđang cập nhật..."
+            android:textSize="14sp" />
+        <TextView
+            android:id="@+id/textTotal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textSize="18dp"
+            android:text="thành tiền"/>
+        <TextView
+            android:id="@+id/textPaymentMenthod"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/textCancel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Đã hủy: \nđang cập nhật..."
+                android:textSize="14sp" />
+            <TextView
+                android:id="@+id/textcancelReason"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Đã hủy: \nđang cập nhật..."
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+            <!-- Cột timeline: chấm tròn + đường thẳng -->
+            <LinearLayout
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+
+                <!-- Mốc 1 -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal">
+
+                    <View
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:background="@drawable/custom_thumb" />
+
+                    <View
+                        android:layout_width="2dp"
+                        android:layout_height="32dp"
+                        android:background="#888888" />
+                </LinearLayout>
+
+                <!-- Mốc 2 -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal">
+
+                    <View
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:background="@drawable/custom_thumb" />
+
+                    <View
+                        android:layout_width="2dp"
+                        android:layout_height="32dp"
+                        android:background="#888888" />
+                </LinearLayout>
+
+                <!-- Mốc 3 -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal">
+
+                    <View
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:background="@drawable/custom_thumb" />
+
+                    <View
+                        android:layout_width="2dp"
+                        android:layout_height="32dp"
+                        android:background="#888888" />
+                </LinearLayout>
+
+                <!-- Mốc 4 -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal">
+
+                    <View
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:background="@drawable/custom_thumb" />
+
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Thông tin các mốc -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_height="wrap_content"
+                android:paddingStart="8dp">
+
+                <TextView
+                    android:id="@+id/textCreated"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Đã đặt hàng: \nđang cập nhật..."
+                    android:textSize="14sp"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:id="@+id/textConfirmed"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Đã xác nhận:\nđang cập nhật..."
+                    android:textSize="14sp"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:id="@+id/textDelivery"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Đang giao:\nđang cập nhật..."
+                    android:textSize="14sp"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:id="@+id/textCompleted"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Đã hoàn thành:\n đang cập nhật..."
+                    android:textSize="14sp"
+                    android:layout_marginBottom="8dp" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <Spinner
+                android:id="@+id/spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/cancelOrder"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="Hủy"
+                android:textColor="@color/color_title"
+                android:background="@drawable/custom_background_button_cancel"
+                android:textAllCaps="false"/>
+        </LinearLayout>
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="300dp"
+            android:layout_height="300dp"/>
+    </LinearLayout>
+</ScrollView>

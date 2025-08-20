@@ -2,17 +2,117 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-feature android:name="android.hardware.camera" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <!-- android > 13 -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_PHONE_NUMBERS" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" /> <!-- OneSignal sẽ tự động thêm các service và receiver của nó thông qua merge manifest -->
+    <!-- Tuy nhiên, bạn cần đảm bảo rằng icon thông báo mặc định được định nghĩa -->
+    <meta-data
+        android:name="com.onesignal.default_notification_icon"
+        android:resource="@drawable/logo" /> <!-- Sử dụng icon của bạn -->
+    <meta-data
+        android:name="com.onesignal.default_notification_color"
+        android:resource="@color/color_a" />
+
     <application
+        android:name=".datalocal.MyApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/logo"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/logo"
         android:supportsRtl="true"
-        android:theme="@style/Theme.KOSPlus">
+        android:theme="@style/Theme.KOSPlus"
+        android:usesCleartextTraffic="true"
+        android:windowSoftInputMode="adjustResize">
+        <activity
+            android:name=".features.ProductEditActivity"
+            android:windowSoftInputMode="adjustPan"
+            android:exported="false" />
+        <activity
+            android:name=".features.WalletActivity"
+            android:exported="false" />
+        <activity
+            android:name=".features.UsersManageActivity"
+            android:exported="false" />
+        <activity
+            android:name=".features.ShopsManageActivity"
+            android:exported="false" />
+        <activity
+            android:name=".features.SalesSummaryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".features.PromotionsManageActivity"
+            android:exported="false" />
+        <activity
+            android:name=".features.ProfileEditActivity"
+            android:windowSoftInputMode="adjustPan"
+            android:exported="false" />
+        <activity
+            android:name=".features.ProductsManageActivity"
+            android:exported="false" />
+        <activity
+            android:name=".features.OrdersManageActivity"
+            android:exported="false" />
+        <activity
+            android:name=".features.NotificationsManageActivity"
+            android:exported="false" />
+        <activity
+            android:name=".features.LuckyWheelActivity"
+            android:windowSoftInputMode="adjustPan"
+            android:exported="false" />
+        <activity
+            android:name=".features.CartsActivity"
+            android:windowSoftInputMode="adjustPan"
+            android:exported="false" />
+        <activity
+            android:name=".features.CheckInScannerActivity"
+            android:exported="false" />
+        <activity
+            android:name=".features.CheckInCodeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".features.BannersManageActivity"
+            android:exported="false" />
+        <activity
+            android:name=".fragment.SettingFragment"
+            android:exported="false" />
+        <activity
+            android:name=".fragment.NotificationsFragment"
+            android:exported="false" />
+        <activity
+            android:name=".fragment.HomeFragment"
+            android:exported="false" />
+        <activity
+            android:name=".fragment.FoodsFragment"
+            android:exported="false" />
+        <activity
+            android:name=".fragment.DrinksFragment"
+            android:exported="false" />
+        <activity
+            android:name=".RegisterActivity"
+            android:windowSoftInputMode="adjustPan"
+            android:exported="false" />
         <activity
             android:name=".LoginActivity"
+            android:windowSoftInputMode="adjustPan"
             android:exported="false" />
         <activity
             android:name=".MainActivity"
@@ -25,7 +125,11 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity> <!-- Khai báo activity để cắt ảnh -->
+        <!-- Theme is optional and only needed if default theme has no action bar. -->
+        <activity
+            android:name="com.canhub.cropper.CropImageActivity"
+            android:theme="@style/Base.Theme.AppCompat" />
     </application>
 
 </manifest>

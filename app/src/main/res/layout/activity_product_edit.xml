@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+<data>
+    <import type="android.view.View"/>
+    <variable
+        name="productEdit"
+        type="com.example.kosplus.features.ProductEditVM" />
+</data>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:id="@+id/layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:orientation="vertical"
+            android:gravity="center">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Thêm tin sản phẩm"
+                android:textSize="18dp"
+                android:textStyle="bold"
+                android:textColor="@color/color_title"/>
+
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="10dp"/>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:padding="5dp"
+                app:strokeColor="@color/color_a"
+                app:strokeWidth="2dp"
+                app:cardElevation="4dp"
+                app:cardCornerRadius="10dp"
+                tools:ignore="MissingConstraints"
+                android:layout_margin="10dp">
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:onClick="@{(view) -> productEdit.pickImage(view)}"
+                    android:src="@{productEdit.avatar}"/>
+            </androidx.cardview.widget.CardView>
+
+            <RadioGroup
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <RadioButton
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:checked="@{productEdit.type == `Food`}"
+                    android:onClick="@{() -> productEdit.onSetType(`Food`)}"
+                    android:text="Food"/>
+                <RadioButton
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:checked="@{productEdit.type == `Drink`}"
+                    android:onClick="@{() -> productEdit.onSetType(`Drink`)}"
+                    android:text="Drink"/>
+            </RadioGroup>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:startIconDrawable="@drawable/rounded_edit_note_24">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Tên sản phẩm"
+                    android:text="@={productEdit.product.name}"
+                    android:imeOptions="actionNext"
+                    android:inputType="text" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:startIconDrawable="@drawable/rounded_attach_money_24">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/price"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Giá"
+                    android:text="@={``+productEdit.product.price}"
+                    android:imeOptions="actionNext"
+                    android:inputType="number" />
+            </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:startIconDrawable="@drawable/rounded_edit_note_24">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Mô tả chi tiết"
+                    android:text="@={productEdit.product.description}"
+                    android:imeOptions="actionNext"
+                    android:inputType="textMultiLine"
+                    android:minLines="5"
+                    android:maxLines="7"
+                    android:scrollbars="vertical"
+                    android:gravity="top"
+                    android:overScrollMode="ifContentScrolls" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:layout_width="200dp"
+                android:layout_height="40dp"
+                android:textAllCaps="false"
+                android:text="Cập nhật"
+                android:onClick="@{(view) -> productEdit.onProductUpdate(view)}"
+                android:background="@drawable/custom_background_button_agree"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:layout_width="200dp"
+                android:layout_height="40dp"
+                android:textAllCaps="false"
+                android:text="Ngừng kinh doanh"
+                android:visibility="@{productEdit.product.status ? View.VISIBLE : View.GONE}"
+                android:onClick="@{(view) -> productEdit.onLock(view)}"
+                android:background="@drawable/custom_background_button_agree"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:layout_width="200dp"
+                android:layout_height="40dp"
+                android:textAllCaps="false"
+                android:text="Mở bán"
+                android:visibility="@{productEdit.product.status ? View.GONE : View.VISIBLE}"
+                android:onClick="@{(view) -> productEdit.onUnLock(view)}"
+                android:background="@drawable/custom_background_button_agree"/>
+            <androidx.appcompat.widget.AppCompatButton
+                android:layout_width="200dp"
+                android:layout_height="40dp"
+                android:textAllCaps="false"
+                android:text="Xóa sản phẩm"
+                android:onClick="@{(view) -> productEdit.onDelete(view)}"
+                android:background="@drawable/custom_background_button_agree"/>
+        </LinearLayout>
+    </ScrollView>
+</layout>

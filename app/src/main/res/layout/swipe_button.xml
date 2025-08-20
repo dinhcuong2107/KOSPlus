@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    <FrameLayout
+        android:id="@+id/swipeButtonContainer"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_margin="5dp"
+        android:background="@drawable/swipe_background"
+        android:padding="4dp">
+
+        <!-- Nền màu xanh khi vuốt xong -->
+        <View
+            android:id="@+id/swipeBackground"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:background="@color/teal_700" />
+
+        <!-- Text hướng dẫn vuốt -->
+        <TextView
+            android:id="@+id/swipeText"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="Vuốt để xác nhận   >>>"
+            android:textSize="16sp"
+            android:textColor="@color/white" />
+
+        <!-- Nút vuốt -->
+        <ImageView
+            android:id="@+id/swipeButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="4dp"
+            android:src="@drawable/logo"
+            android:background="@drawable/swipe_button_bg"
+            android:padding="10dp"
+            android:elevation="4dp"/>
+
+    </FrameLayout>
+
+</LinearLayout>

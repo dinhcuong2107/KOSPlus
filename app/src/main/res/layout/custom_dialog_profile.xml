@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="10dp"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="@drawable/custom_background_border">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <ImageButton
+            android:id="@+id/cancel"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="@drawable/custom_background_button_cancel"
+            android:src="@drawable/rounded_close_24"
+            app:tint="@color/color_a" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:textSize="18dp"
+            android:textStyle="bold"
+            android:textColor="@color/color_title"
+            android:text="User ID Card"/>
+
+        <ImageButton
+            android:id="@+id/editprofile"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="@drawable/custom_background_button_cancel"
+            android:src="@drawable/rounded_edit_note_24"
+            app:tint="@color/color_a" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:padding="8dp"
+        android:orientation="vertical"
+        android:background="@drawable/custom_background_border">
+        <TextView
+            android:id="@+id/userName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="18dp"
+            android:textStyle="bold"
+            android:textColor="@color/color_title"
+            android:text="UserName"/>
+        <TextView
+            android:id="@+id/userRole"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="UserRole"
+            android:textSize="18dp"
+            android:textStyle="bold" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:background="@drawable/custom_background_border"
+        android:orientation="horizontal"
+        android:gravity="center">
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardView"
+                android:layout_width="160dp"
+                android:layout_height="160dp"
+                app:cardCornerRadius="10dp"
+                android:layout_centerHorizontal="true"
+                app:cardElevation="4dp"
+                app:strokeWidth="2dp"
+                tools:ignore="MissingConstraints">
+                <ImageView
+                    android:id="@+id/imageView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:background="@drawable/rounded_person_24" />
+                <androidx.cardview.widget.CardView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    app:strokeWidth="2dp"
+                    android:layout_gravity="center|bottom"
+                    app:cardElevation="4dp"
+                    app:cardCornerRadius="100dp"
+                    tools:ignore="MissingConstraints">
+                    <ImageView
+                        android:id="@+id/userSex"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/ic_launcher_background" />
+                </androidx.cardview.widget.CardView>
+            </androidx.cardview.widget.CardView>
+        </RelativeLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginLeft="10dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingVertical="5dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/rounded_star_24"
+                    app:tint="#FFEB3B"/>
+
+                <TextView
+                    android:id="@+id/userPoints"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="loyaltyPoints"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <!-- Số điện thoại -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingVertical="5dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/round_local_phone_24" />
+
+                <TextView
+                    android:id="@+id/userPhone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="0866802107"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingVertical="5dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/rounded_calendar_month_24" />
+
+                <TextView
+                    android:id="@+id/userDob"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="12/03/2025"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingVertical="5dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/rounded_calendar_month_24" />
+
+                <TextView
+                    android:id="@+id/usertime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="12/03/2025"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/imageQR"
+        android:layout_width="200dp"
+        android:layout_height="200dp"/>
+
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/deposit"
+        android:layout_width="210dp"
+        android:layout_height="40dp"
+        android:textColor="@color/color_title"
+        android:background="@drawable/custom_background_button_cancel"
+        android:text="Nạp tiền"
+        android:textAllCaps="false" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/status"
+        android:layout_width="210dp"
+        android:layout_height="40dp"
+        android:layout_marginBottom="50dp"
+        android:textColor="@color/color_title"
+        android:background="@drawable/custom_background_button_cancel"
+        android:text="Khóa tài khoản"
+        android:textAllCaps="false" />
+
+</LinearLayout>

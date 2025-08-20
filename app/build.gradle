@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -38,13 +39,52 @@ dependencies {
     implementation libs.material
     implementation libs.activity
     implementation libs.constraintlayout
+    implementation libs.firebase.database
+    implementation libs.firebase.firestore
+    implementation libs.firebase.storage
+    implementation libs.firebase.messaging
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
+
+    implementation 'com.google.android.material:material:1.12.0'
 
     // ViewModel
     implementation 'androidx.lifecycle:lifecycle-viewmodel:2.9.2'
     // LiveData
     implementation 'androidx.lifecycle:lifecycle-livedata:2.9.2'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+
+    // QR Code
+    implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
+    implementation 'com.google.zxing:core:3.4.1'
+
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'   // Thư viện HTTP
+    implementation 'org.json:json:20250107'               // Thư viện JSON
+
+    implementation 'io.github.ParkSangGwon:tedpermission-normal:3.4.2'
+
+    implementation 'commons-net:commons-net:3.6'
+
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'com.google.code.gson:gson:2.10.1'
+
+    // Camera Scan QR
+    implementation 'com.github.yuriy-budiyev:code-scanner:2.1.0'
+
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+
+    implementation 'androidx.viewpager2:viewpager2:1.1.0'
+
+    implementation 'me.relex:circleindicator:2.1.6'
+    implementation 'com.squareup.picasso:picasso:2.71828'
+
+    implementation 'com.github.mmoamenn:LuckyWheel_Android:0.3.0'
+
+    // Notification
+    implementation 'com.onesignal:OneSignal:[5.1.6, 5.1.99]'
+
+    // Image Picker and Cropper
+    implementation("com.vanniktech:android-image-cropper:4.6.0")
 }
