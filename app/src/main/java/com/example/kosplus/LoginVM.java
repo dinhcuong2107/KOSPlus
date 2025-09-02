@@ -33,15 +33,19 @@ public class LoginVM extends ViewModel {
     public ObservableField<String> name = new ObservableField<>();
     public ObservableField<String> password = new ObservableField<>();
     public LoginVM() {
+        name.set("Đăng nhập");
+
         if (DataLocalManager.getUid() != ""){
             DatabaseReference reference = FirebaseDatabase.getInstance().getReference("KOS Plus").child("Users").child(DataLocalManager.getUid());
             reference.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    Users users = snapshot.getValue(Users.class);
-                    if (users != null && users.status) {
-                        phone.set(users.phone);
-                        name.set("Xin chào " + users.fullname);
+                    if (snapshot.exists()) {
+                        Users users = snapshot.getValue(Users.class);
+                        if (users != null && users.status) {
+                            phone.set(users.phone);
+                            name.set("Xin chào " + users.fullname);
+                        }
                     }
                 }
 

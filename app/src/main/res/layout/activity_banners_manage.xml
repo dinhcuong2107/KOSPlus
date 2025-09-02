@@ -13,6 +13,9 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical">
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="24dp"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -45,8 +48,8 @@
             android:onClick="@{(view) -> bannersManage.onDialogCreateBanner(view)}"
             android:text="Tạo Banner"
             android:textAllCaps="false"
-            android:textColor="@color/color_a"
-            android:textSize="21dp"
+            android:textColor="@color/white"
+            android:textSize="18dp"
             android:textStyle="bold" />
 
     </LinearLayout>

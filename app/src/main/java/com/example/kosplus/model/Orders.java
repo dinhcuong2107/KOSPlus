@@ -15,8 +15,8 @@ public class Orders {
     public String confirmedTime; // Thời gian xác nhận đơn hàng
     public String deliveryTime; // Thời gian giao hàng
     public String completedTime; // Thời gian hoàn thành đơn hàng
-    public String cancelledTime; // Thời gian hủy đơn hàng
-    public String cancelledReason; // Lý do hủy đơn hàng
+    public String canceledTime; // Thời gian hủy đơn hàng
+    public String canceledReason; // Lý do hủy đơn hàng
     public int total; // Tổng giá trị đơn hàng
     public boolean delivery; // Trạng thái giao hàng;
 
@@ -25,7 +25,7 @@ public class Orders {
     public Orders() {
     }
 
-    public Orders(String id, String userId, List<String> productId, List<Integer> quantity, List<Integer> price, String address, String note, String paymentMethod, String createdTime, String confirmedTime, String deliveryTime, String completedTime, String cancelledTime, String cancelledReason, int total, boolean delivery, boolean status) {
+    public Orders(String id, String userId, List<String> productId, List<Integer> quantity, List<Integer> price, String address, String note, String paymentMethod, String createdTime, String confirmedTime, String deliveryTime, String completedTime, String canceledTime, String canceledReason, int total, boolean delivery, boolean status) {
         this.id = id;
         this.userId = userId;
         this.productId = productId;
@@ -38,8 +38,8 @@ public class Orders {
         this.confirmedTime = confirmedTime;
         this.deliveryTime = deliveryTime;
         this.completedTime = completedTime;
-        this.cancelledTime = cancelledTime;
-        this.cancelledReason = cancelledReason;
+        this.canceledTime = canceledTime;
+        this.canceledReason = canceledReason;
         this.total = total;
         this.delivery = delivery;
         this.status = status;

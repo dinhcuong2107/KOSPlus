@@ -1,5 +1,6 @@
 package com.example.kosplus.features;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -18,6 +19,12 @@ import com.example.kosplus.R;
 import com.example.kosplus.adapter.CalendarRevenueAdapter;
 import com.example.kosplus.adapter.ProductOrderAdapter;
 import com.example.kosplus.databinding.ActivitySalesSummaryBinding;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.formatter.ValueFormatter;
 
 import java.time.YearMonth;
 import java.util.ArrayList;
@@ -27,13 +34,13 @@ import java.util.List;
 import java.util.Map;
 
 public class SalesSummaryActivity extends AppCompatActivity {
-
+    ActivitySalesSummaryBinding binding;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
 
-        ActivitySalesSummaryBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_sales_summary);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_sales_summary);
         SalesSummaryVM viewModel = new ViewModelProvider(this).get(SalesSummaryVM.class);
         binding.setSalessummary(viewModel);
         binding.setLifecycleOwner(this);
@@ -42,9 +49,6 @@ public class SalesSummaryActivity extends AppCompatActivity {
         Calendar calendar = Calendar.getInstance();
         int currentMonth = calendar.get(Calendar.MONTH) + 1; // Java đếm từ 0
         int currentYear = calendar.get(Calendar.YEAR);
-
-        binding.currentmonth.setText("Tháng " + currentMonth + ", " + currentYear);
-        binding.lastmonth.setText("Tháng " + (currentMonth - 1) + ", " + currentYear);
 
         viewModel.getDailyRevenueInMonth(currentMonth, currentYear, data -> {
             int daysInMonthCount = YearMonth.of(currentYear, currentMonth).lengthOfMonth();
@@ -57,49 +61,41 @@ public class SalesSummaryActivity extends AppCompatActivity {
                 int revenue = data.getOrDefault(day, 0);
                 revenuePerDay.add(revenue);
             }
-
-
             binding.calendarRecyclerView.setLayoutManager(new GridLayoutManager(this, 7));
             binding.calendarRecyclerView.setAdapter(new CalendarRevenueAdapter(daysInMonth, revenuePerDay));
 
         });
-        viewModel.getMonthlySalesWithRevenueRaw(currentMonth, currentYear, new SalesSummaryVM.OnResultCallback() {
+
+        // Lấy doanh thu 12 tháng năm hiện tại
+        viewModel.getMonthlyRevenueInYear(currentYear, revenuePerMonth -> {
+            runOnUiThread(() -> drawMonthlyRevenueChart(revenuePerMonth, currentYear));
+        });
+
+        binding.currentmonth.setText("Tháng " + currentMonth + ", " + currentYear);
+
+        viewModel.getMonthlySalesQuantity(currentMonth, currentYear, new SalesSummaryVM.OnQuantityCallback() {
             @Override
-            public void onResult(Map<String, int[]> data) {
+            public void onResult(Map<String, Integer> data) {
                 if (data == null || data.isEmpty()) {
                     Log.d("TOP_PRODUCT", "Không có dữ liệu.");
                     return;
                 }
 
-                // Chuyển map thành list để sắp xếp
-                List<Map.Entry<String, int[]>> sortedList = new ArrayList<>(data.entrySet());
+                // Sắp xếp theo số lượng giảm dần
+                List<Map.Entry<String, Integer>> sortedList = new ArrayList<>(data.entrySet());
+                Collections.sort(sortedList, (e1, e2) -> Integer.compare(e2.getValue(), e1.getValue()));
 
-                // Sắp xếp theo số lượng giảm dần (index 0 là quantity)
-                Collections.sort(sortedList, (e1, e2) -> Integer.compare(e2.getValue()[0], e1.getValue()[0]));
-
-                // Khởi tạo 3 danh sách
                 List<String> idList = new ArrayList<>();
                 List<Integer> quantityList = new ArrayList<>();
-                List<Integer> revenueList = new ArrayList<>();
 
-                // Lặp để lấy từng phần tử và thêm vào 3 list
-                for (Map.Entry<String, int[]> entry : sortedList) {
-                    String productId = entry.getKey();
-                    int quantity = entry.getValue()[0];
-                    int revenue = entry.getValue()[1];
-
-                    Log.d("TOP_PRODUCT", "SP: " + productId + " | SL: " + quantity + " | Doanh thu: " + revenue);
-
-                    idList.add(productId);
-                    quantityList.add(quantity);
-                    revenueList.add(revenue);
+                for (Map.Entry<String, Integer> entry : sortedList) {
+                    idList.add(entry.getKey());
+                    quantityList.add(entry.getValue());
+                    Log.d("TOP_PRODUCT", "SP: " + entry.getKey() + " | SL: " + entry.getValue());
                 }
-                // salesAdapter.setData(idList, quantityList, revenueList);
-                // Cấu hình RecyclerView
-                binding.recyclerView.setLayoutManager(new LinearLayoutManager(SalesSummaryActivity.this, RecyclerView.VERTICAL, false));
-                binding.recyclerView.setHasFixedSize(true);
 
-                ProductOrderAdapter adapter = new ProductOrderAdapter(idList, quantityList, revenueList);
+                ProductOrderAdapter adapter = new ProductOrderAdapter(idList, quantityList, new ArrayList<>());
+                binding.recyclerView.setLayoutManager(new LinearLayoutManager(SalesSummaryActivity.this));
                 binding.recyclerView.setAdapter(adapter);
             }
 
@@ -109,51 +105,52 @@ public class SalesSummaryActivity extends AppCompatActivity {
             }
         });
 
-        viewModel.getMonthlySalesWithRevenueRaw(currentMonth-1, currentYear, new SalesSummaryVM.OnResultCallback() {
-            @Override
-            public void onResult(Map<String, int[]> data) {
-                if (data == null || data.isEmpty()) {
-                    Log.d("TOP_PRODUCT", "Không có dữ liệu.");
-                    return;
-                }
+    }
 
-                // Chuyển map thành list để sắp xếp
-                List<Map.Entry<String, int[]>> sortedList = new ArrayList<>(data.entrySet());
+    private void drawMonthlyRevenueChart(Map<Integer, Integer> revenuePerMonth, int year) {
+        List<BarEntry> entries = new ArrayList<>();
 
-                // Sắp xếp theo số lượng giảm dần (index 0 là quantity)
-                Collections.sort(sortedList, (e1, e2) -> Integer.compare(e2.getValue()[0], e1.getValue()[0]));
+        // Thêm dữ liệu theo tháng 1..12
+        for (int month = 1; month <= 12; month++) {
+            int revenue = revenuePerMonth.getOrDefault(month, 0);
+            entries.add(new BarEntry(month, revenue));
+        }
 
-                // Khởi tạo 3 danh sách
-                List<String> idList = new ArrayList<>();
-                List<Integer> quantityList = new ArrayList<>();
-                List<Integer> revenueList = new ArrayList<>();
+        BarDataSet dataSet = new BarDataSet(entries, "Doanh thu " + year);
+        dataSet.setColor(Color.parseColor("#4CAF50")); // xanh lá
+        dataSet.setValueTextSize(10f);
 
-                // Lặp để lấy từng phần tử và thêm vào 3 list
-                for (Map.Entry<String, int[]> entry : sortedList) {
-                    String productId = entry.getKey();
-                    int quantity = entry.getValue()[0];
-                    int revenue = entry.getValue()[1];
+        BarData barData = new BarData(dataSet);
+        barData.setBarWidth(0.9f);
 
-                    Log.d("TOP_PRODUCT", "SP: " + productId + " | SL: " + quantity + " | Doanh thu: " + revenue);
+        binding.monthlyRevenueChart.setData(barData);
+        binding.monthlyRevenueChart.setFitBars(true);
+        binding.monthlyRevenueChart.getDescription().setEnabled(false);
 
-                    idList.add(productId);
-                    quantityList.add(quantity);
-                    revenueList.add(revenue);
-                }
-                // salesAdapter.setData(idList, quantityList, revenueList);
-                // Cấu hình RecyclerView
-                binding.recyclerView.setLayoutManager(new LinearLayoutManager(SalesSummaryActivity.this, RecyclerView.VERTICAL, false));
-                binding.recyclerView.setHasFixedSize(true);
-
-                ProductOrderAdapter adapter = new ProductOrderAdapter(idList, quantityList, revenueList);
-                binding.recyclerView.setAdapter(adapter);
-            }
+        // Trục X hiển thị tháng
+        XAxis xAxis = binding.monthlyRevenueChart.getXAxis();
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setGranularity(1f);
+        xAxis.setLabelCount(12);
+        xAxis.setValueFormatter(new ValueFormatter() {
+            private final String[] months = {"", "T1", "T2", "T3", "T4", "T5", "T6",
+                    "T7", "T8", "T9", "T10", "T11", "T12"};
 
             @Override
-            public void onError(String error) {
-                Log.e("SALES_ERROR", error);
+            public String getFormattedValue(float value) {
+                if (value >= 1 && value <= 12) {
+                    return months[(int) value];
+                } else return "";
             }
         });
 
+        // Trục Y bên trái
+        YAxis yAxisLeft = binding.monthlyRevenueChart.getAxisLeft();
+        yAxisLeft.setAxisMinimum(0f);
+        binding.monthlyRevenueChart.getAxisRight().setEnabled(false);
+
+        // Animation
+        binding.monthlyRevenueChart.animateY(1000);
+        binding.monthlyRevenueChart.invalidate();
     }
 }

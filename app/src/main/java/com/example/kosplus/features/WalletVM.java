@@ -19,6 +19,7 @@ import com.example.kosplus.databinding.CustomDialogQrcodeBinding;
 import com.example.kosplus.datalocal.DataLocalManager;
 import com.example.kosplus.func.Utils;
 import com.example.kosplus.model.Shops;
+import com.example.kosplus.model.Users;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -28,6 +29,7 @@ import com.squareup.picasso.Picasso;
 
 public class WalletVM extends ViewModel {
     public ObservableField<String> balance = new ObservableField<>();
+    public ObservableField<String> userName = new ObservableField<>();
     public ObservableField<String> bankCode = new ObservableField<>();
     public ObservableField<String> bankNumber = new ObservableField<>();
 
@@ -52,7 +54,23 @@ public class WalletVM extends ViewModel {
             }
         });
 
-        loadDefault();
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("KOS Plus").child("Users").child(DataLocalManager.getUid());
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    Users user = snapshot.getValue(Users.class);
+                    userName.set(user.fullname);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+            loadDefault();
     }
 
     private void loadDefault() {

@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.kosplus.databinding.ItemCheckinCodeBinding;
+import com.example.kosplus.datalocal.DataLocalManager;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -60,8 +61,14 @@ public class CheckInCodeAdapter extends RecyclerView.Adapter<CheckInCodeAdapter.
                     for (DataSnapshot checkinSnapshot : snapshot.getChildren()) {
                         String checkinKey = checkinSnapshot.getKey();
                         String checkinValue = checkinSnapshot.getValue(String.class);
-
-                        checkInMap.put(checkinKey, checkinValue);
+                        if (DataLocalManager.getRole().equals("Admin") || DataLocalManager.getRole().equals("Manager")) {
+                            checkInMap.put(checkinKey, checkinValue);
+                        } else {
+                            if (checkinKey.equals(DataLocalManager.getUid()))
+                            {
+                                checkInMap.put(checkinKey, checkinValue);
+                            }
+                        }
                     }
 
                     // Sau khi có data => set adapter

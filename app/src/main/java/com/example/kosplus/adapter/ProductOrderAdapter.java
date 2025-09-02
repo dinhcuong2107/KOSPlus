@@ -1,6 +1,7 @@
 package com.example.kosplus.adapter;
 
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -47,10 +48,16 @@ public class ProductOrderAdapter extends RecyclerView.Adapter<ProductOrderAdapte
     public void onBindViewHolder(@NonNull ProductOrderViewHolder holder, int position) {
         String id = productIds.get(position);
         int quantity = quantities.get(position);
-        int price = prices.get(position);
+        holder.binding.textquantity.setText(" x "+quantity);
 
-        holder.binding.textquantity.setText(String.valueOf(quantity));
-        holder.binding.textprice.setText(String.valueOf(price));
+        if (prices == null || prices.isEmpty())
+        {
+            holder.binding.textprice.setVisibility(View.GONE);
+        } else {
+            holder.binding.textprice.setVisibility(View.VISIBLE);
+            int price = prices.get(position);
+            holder.binding.textprice.setText(" = " + price);
+        }
 
         DatabaseReference databaseReference = FirebaseDatabase.getInstance()
                 .getReference("KOS Plus")

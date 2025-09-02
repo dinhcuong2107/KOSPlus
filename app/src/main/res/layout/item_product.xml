@@ -3,7 +3,9 @@
     android:id="@+id/layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="5dp"
+    android:background="@drawable/custom_background_noborder"
+    android:padding="4dp"
+    android:layout_margin="4dp"
     android:gravity="center"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -19,74 +21,74 @@
             android:layout_width="200dp"
             android:layout_height="200dp"
             android:scaleType="centerCrop"/>
+        <TextView
+            android:id="@+id/discount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:layout_gravity="left|top"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:textSize="12dp"
+            android:textStyle="bold"
+            android:background="@drawable/custom_background_grey_circle"
+            android:textColor="#FF0000"
+            android:text="-50%"/>
+        <TextView
+            android:id="@+id/quantity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:layout_gravity="right|bottom"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:textSize="12dp"
+            android:textStyle="bold"
+            android:background="@drawable/custom_background_grey_circle"
+            android:text="Đã bán 55555"/>
     </androidx.cardview.widget.CardView>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:orientation="vertical">
-        <LinearLayout
+
+        <TextView
+            android:id="@+id/name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="16dp"
-                android:text="name"
-                android:textStyle="bold"/>
-            <TextView
-                android:id="@+id/star"
-                android:layout_width="60dp"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:textSize="16dp"
-                android:textStyle="bold"
-                android:drawableStart="@drawable/rounded_star_24"
-                android:text="100"/>
-        </LinearLayout>
-
+            android:layout_weight="1"
+            android:textSize="16dp"
+            android:text="name"
+            android:textStyle="bold"/>
         <TextView
             android:id="@+id/description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:maxLines="1"
             android:ellipsize="end"
+            android:textSize="12dp"
             android:text="description"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="horizontal">
-            <LinearLayout
+            <TextView
+                android:id="@+id/final_price"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_weight="1">
-                <TextView
-                    android:id="@+id/price"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="14dp"
-                    android:text="price"/>
-                <TextView
-                    android:id="@+id/final_price"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textSize="16dp"
-                    android:text="price"
-                    android:textStyle="bold"/>
-            </LinearLayout>
-
-            <ImageView
+                android:layout_weight="1"
+                android:textSize="18dp"
+                android:textColor="#03A9F4"
+                android:text="100000 $"
+                android:textStyle="bold"/>
+            <pl.droidsonroids.gif.GifImageView
                 android:id="@+id/done"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_margin="4dp"
-                android:src="@drawable/rounded_shopping_cart_24"/>
+                android:src="@drawable/ani_shopping_cart" />
         </LinearLayout>
 
     </LinearLayout>

@@ -36,6 +36,7 @@ import com.example.kosplus.features.ProductEditActivity;
 import com.example.kosplus.features.ProfileEditActivity;
 import com.example.kosplus.func.Utils;
 import com.example.kosplus.model.ItemCarts;
+import com.example.kosplus.model.Orders;
 import com.example.kosplus.model.Products;
 import com.example.kosplus.model.Promotions;
 import com.google.firebase.database.DataSnapshot;
@@ -48,14 +49,19 @@ import com.squareup.picasso.Picasso;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
-public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> implements Filterable {
+public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder>{
     List<Products> list,list_search;
+    private Map<String, Integer> soldMap = new HashMap<>();
+    private DatabaseReference ordersRef = FirebaseDatabase.getInstance().getReference("KOS Plus").child("Orders");
     public ProductAdapter(List<Products> list) {
         this.list = list;
         this.list_search = list;
+        loadSoldData();
         notifyDataSetChanged();
     }
 
@@ -64,41 +70,50 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         this.list_search = list;
         notifyDataSetChanged();
     }
-
-
-    @Override
-    public Filter getFilter() {
-        return new Filter() {
+    // 🔹 Load toàn bộ số lượng đã bán của tất cả sản phẩm
+    private void loadSoldData() {
+        ordersRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            protected FilterResults performFiltering(CharSequence constraint) {
-                String keySearch = constraint.toString();
-                if (keySearch.isEmpty())
-                {
-                    list = list_search;
-                } else {
-                    List<Products> productList = new ArrayList<>();
-                    for (Products product: list_search)
-                    {
-                        if (product.name.toLowerCase().contains(keySearch.toLowerCase()))
-                        {
-                            productList.add(product);
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                soldMap.clear();
+                for (DataSnapshot orderSnap : snapshot.getChildren()) {
+                    Orders order = orderSnap.getValue(Orders.class);
+
+                    if (order != null && order.completedTime != null && !order.completedTime.isEmpty()) {
+
+                        // duyệt qua danh sách sản phẩm trong đơn hàng
+                        for (int i = 0; i < order.productId.size(); i++) {
+                            String productId = order.productId.get(i);
+                            int quantity = order.quantity.get(i);
+
+                            soldMap.put(productId, soldMap.getOrDefault(productId, 0) + quantity);
                         }
                     }
-                    list = productList;
                 }
-                FilterResults filterResults = new FilterResults();
-                filterResults.values = list;
-                return filterResults;
+                notifyDataSetChanged(); // 🔥 cập nhật lại danh sách sau khi load xong
             }
 
             @Override
-            protected void publishResults(CharSequence constraint, FilterResults results) {
-                list.addAll((List<Products>) results.values); // Thêm dữ liệu mới
-                notifyDataSetChanged();
-            }
-        };
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
     }
 
+    public void filter (String keySearch) {
+        if (keySearch == null || keySearch.isEmpty()) {
+            list = list_search;
+        } else {
+            List<Products> productList = new ArrayList<>();
+            for (Products product : list_search) {
+                if (product.name.toLowerCase().contains(keySearch.toLowerCase())) {
+                    productList.add(product);
+                }
+            }
+            list = productList;
+        }
+        if (list != null) {
+            notifyDataSetChanged();
+        }
+    }
 
     @NonNull
     @Override
@@ -110,26 +125,22 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
     @Override
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
-
-        ViewGroup.MarginLayoutParams params =
-                (ViewGroup.MarginLayoutParams) holder.itemView.getLayoutParams();
-
-        if (position % 2 == 0) {
-            params.topMargin = 0;
-        } else {
-            params.topMargin = 60; //
-        }
-
-        holder.itemView.setLayoutParams(params);
-
         Products product = list.get(position);
         Picasso.get().load(product.imageUrl).into(holder.binding.imageView);
         holder.binding.name.setText(product.name);
         holder.binding.description.setText(product.description);
 
+        // 🔹 Lấy số lượng đã bán từ Map
+        int soldQuantity = soldMap.getOrDefault(product.id, 0);
+        if (soldQuantity == 0) {
+            holder.binding.quantity.setText("New");
+        }else {
+            holder.binding.quantity.setText("Đã bán: " + soldQuantity);
+        }
+
         if (product.promotion == null || product.promotion.isEmpty() || product.promotion.equals("")) {
-            holder.binding.price.setVisibility(GONE);
-            holder.binding.finalPrice.setText(product.price + " VNĐ");
+            holder.binding.discount.setVisibility(GONE);
+            holder.binding.finalPrice.setText(Utils.formatCurrencyVND(product.price));
         } else {
             new Thread(() -> {
                 long internetTime = Utils.getInternetTimeMillis();
@@ -149,23 +160,24 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                                         Promotions promotion = snapshot.getValue(Promotions.class);
 
                                         if (!promotion.status || !Utils.checkTime(timeString, promotion.start_date, promotion.end_date)) {
-                                            holder.binding.price.setText("CT KM kết thúc");
+                                            holder.binding.discount.setVisibility(View.GONE);
                                             holder.binding.finalPrice.setText(Utils.formatCurrencyVND(product.price));
                                         } else {
-                                            holder.binding.price.setText(Utils.formatCurrencyVND(product.price));
-                                            holder.binding.price.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG);
-
                                             if (promotion.type.equals("amount")) {
                                                 int finalPrice = product.price - promotion.discount;
                                                 holder.binding.finalPrice.setText(Utils.formatCurrencyVND(finalPrice));
+
+                                                holder.binding.discount.setText(" - " + Utils.formatCurrencyVND(promotion.discount));
                                             } else {
                                                 int finalPrice = product.price - (product.price * promotion.discount / 100);
                                                 holder.binding.finalPrice.setText(Utils.formatCurrencyVND(finalPrice));
+
+                                                holder.binding.discount.setText(" - " + promotion.discount + "%");
                                             }
                                         }
                                     }
                                     else {
-                                        holder.binding.price.setVisibility(GONE);
+                                        holder.binding.discount.setVisibility(GONE);
                                         holder.binding.finalPrice.setText(Utils.formatCurrencyVND(product.price));
                                     }
                                 }
@@ -262,6 +274,14 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         productDetailBinding.description.setText("[ "+product.type+" ]"+ "\n" +product.description);
         productDetailBinding.category.setText(product.category);
 
+        // 🔹 Lấy số lượng đã bán từ Map
+        int soldQuantity = soldMap.getOrDefault(product.id, 0);
+        if (soldQuantity == 0) {
+            productDetailBinding.quantity.setText("New");
+        }else {
+            productDetailBinding.quantity.setText("Đã bán: " + soldQuantity);
+        }
+
         if (product.status) {
             productDetailBinding.status.setText("Còn hàng");
         } else {
@@ -279,8 +299,11 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                 productDetailBinding.promotionconnect.setVisibility(VISIBLE);
             }
 
+            productDetailBinding.promotion.setVisibility(GONE);
+            productDetailBinding.promotionStatus.setVisibility(GONE);
             productDetailBinding.price.setVisibility(GONE);
             productDetailBinding.finalPrice.setText(Utils.formatCurrencyVND(product.price));
+            productDetailBinding.promotionconnect.setVisibility(GONE);
         } else {
             if (DataLocalManager.getRole().equals("Admin"))
             {

@@ -79,6 +79,7 @@ dependencies {
 
     implementation 'me.relex:circleindicator:2.1.6'
     implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.29'
 
     implementation 'com.github.mmoamenn:LuckyWheel_Android:0.3.0'
 
@@ -87,4 +88,6 @@ dependencies {
 
     // Image Picker and Cropper
     implementation("com.vanniktech:android-image-cropper:4.6.0")
+    // Chart
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 }

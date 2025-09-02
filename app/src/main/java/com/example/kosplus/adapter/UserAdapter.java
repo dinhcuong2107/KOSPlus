@@ -16,7 +16,7 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> implements Filterable {
+public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
     List<Users> list, list_search;
 
     public UserAdapter(List<Users> list) {
@@ -31,37 +31,23 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         notifyDataSetChanged();
     }
 
-
-    @Override
-    public Filter getFilter() {
-        return new Filter() {
-            @Override
-            protected FilterResults performFiltering(CharSequence constraint) {
-                String keySearch = constraint.toString();
-                if (keySearch.isEmpty()) {
-                    list = list_search;
-                } else {
-                    List<Users> usersList = new ArrayList<>();
-                    for (Users users : list_search) {
-                        if (users.phone.toLowerCase().contains(keySearch.toLowerCase()) ||
-                                users.fullname.toLowerCase().contains(keySearch.toLowerCase())
-                                || users.id.contains(keySearch)) {
-                            usersList.add(users);
-                        }
-                    }
-                    list = usersList;
+    public void filter(String keySearch) {
+        if (keySearch == null || keySearch.isEmpty()) {
+            list = list_search;
+        } else {
+            List<Users> usersList = new ArrayList<>();
+            for (Users users : list_search) {
+                if (users.phone.toLowerCase().contains(keySearch.toLowerCase()) ||
+                        users.fullname.toLowerCase().contains(keySearch.toLowerCase())
+                        || users.id.contains(keySearch)) {
+                    usersList.add(users);
                 }
-                FilterResults filterResults = new FilterResults();
-                filterResults.values = list;
-                return filterResults;
             }
-
-            @Override
-            protected void publishResults(CharSequence constraint, FilterResults results) {
-                list = (List<Users>) results.values;
-                notifyDataSetChanged();
-            }
-        };
+            list = usersList;
+        }
+        if (list != null) {
+            notifyDataSetChanged();
+        }
     }
 
     @NonNull

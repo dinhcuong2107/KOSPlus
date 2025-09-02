@@ -18,6 +18,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class DateAdapter extends RecyclerView.Adapter<DateAdapter.ItemDateViewHolder> {
     private List<String> list;
@@ -47,6 +48,7 @@ public class DateAdapter extends RecyclerView.Adapter<DateAdapter.ItemDateViewHo
         holder.binding.textview.setText(date);
 
         CheckInCodeAdapter adapter = new CheckInCodeAdapter(new HashMap<>());
+
         holder.binding.recyclerView.setLayoutManager(new LinearLayoutManager(holder.itemView.getContext()));
         holder.binding.recyclerView.setAdapter(adapter);
 
@@ -68,8 +70,11 @@ public class DateAdapter extends RecyclerView.Adapter<DateAdapter.ItemDateViewHo
                         Log.d("CheckInCodeVM", "ShopId: " + shopId + " | CheckinCode: " + checkinCode);
                     }
 
-                    // Sau khi có data => set adapter
-                    adapter.updateData(checkInCodeMap);
+                    // ✅ Sắp xếp theo shopId
+                    Map<String, String> sortedMap = new TreeMap<>(checkInCodeMap);
+
+                    // Gửi dữ liệu đã sort vào adapter
+                    adapter.updateData(sortedMap);
 
                 } else {
                     holder.binding.textview.setText(date + " Nghỉ");

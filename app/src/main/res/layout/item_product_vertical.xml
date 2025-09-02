@@ -3,15 +3,16 @@
     android:id="@+id/layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="5dp"
+    android:layout_marginTop="4dp"
+    android:paddingRight="8dp"
     android:gravity="center"
+    android:background="@drawable/custom_background_noborder"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="horizontal">
     <androidx.cardview.widget.CardView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:strokeColor="@color/color_a"
         app:cardCornerRadius="12dp"
         tools:ignore="MissingConstraints">
         <ImageView
@@ -23,32 +24,18 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
+        android:layout_marginLeft="8dp"
         android:layout_gravity="center"
         android:layout_weight="1"
         android:orientation="vertical">
-        <LinearLayout
+        <TextView
+            android:id="@+id/name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <TextView
-                android:id="@+id/name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="16dp"
-                android:text="name"
-                android:textStyle="bold"/>
-            <TextView
-                android:id="@+id/star"
-                android:layout_width="60dp"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:textSize="16dp"
-                android:textStyle="bold"
-                android:drawableStart="@drawable/rounded_star_24"
-                android:text="100"/>
-        </LinearLayout>
+            android:layout_weight="1"
+            android:textSize="16dp"
+            android:text="name"
+            android:textStyle="bold"/>
         <TextView
             android:id="@+id/description"
             android:layout_width="match_parent"
@@ -82,12 +69,12 @@
                     android:textStyle="bold"/>
             </LinearLayout>
 
-            <ImageView
+            <pl.droidsonroids.gif.GifImageView
                 android:id="@+id/done"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_margin="4dp"
-                android:src="@drawable/rounded_shopping_cart_24"/>
+                android:src="@drawable/ani_shopping_cart" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

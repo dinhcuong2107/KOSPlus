@@ -49,10 +49,16 @@ public class NotificationsFragment extends Fragment {
         liveData.getLiveData().observe(this.getViewLifecycleOwner(), new Observer<List<Notifications>>() {
             @Override
             public void onChanged(List<Notifications> notifications) {
+                if (notifications == null || notifications.isEmpty()) {
+                    binding.recyclerView.setVisibility(View.GONE);
+                    binding.textview.setVisibility(View.VISIBLE);
+                } else {
+                    binding.recyclerView.setVisibility(View.VISIBLE);
+                    binding.textview.setVisibility(View.GONE);
+                }
                 adapter.updateData(notifications);
             }
         });
-
         return binding.getRoot();
     }
 }

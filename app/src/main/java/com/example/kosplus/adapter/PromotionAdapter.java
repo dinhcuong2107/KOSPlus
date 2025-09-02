@@ -17,7 +17,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PromotionAdapter extends RecyclerView.Adapter<PromotionAdapter.PromotionViewHolder> implements Filterable {
+public class PromotionAdapter extends RecyclerView.Adapter<PromotionAdapter.PromotionViewHolder> {
     List<Promotions> list, list_search;
 
     public PromotionAdapter(List<Promotions> list) {
@@ -32,37 +32,23 @@ public class PromotionAdapter extends RecyclerView.Adapter<PromotionAdapter.Prom
         notifyDataSetChanged();
     }
 
-
-    @Override
-    public Filter getFilter() {
-        return new Filter() {
-            @Override
-            protected FilterResults performFiltering(CharSequence constraint) {
-                String keySearch = constraint.toString();
-                if (keySearch.isEmpty()) {
-                    list = list_search;
-                } else {
-                    List<Promotions> promotionsList = new ArrayList<>();
-                    for (Promotions promotion : list_search) {
-                        if (promotion.code.toLowerCase().contains(keySearch.toLowerCase()) ||
-                                promotion.title.toLowerCase().contains(keySearch.toLowerCase())
-                                || promotion.id.contains(keySearch.toLowerCase())) {
-                            promotionsList.add(promotion);
-                        }
-                    }
-                    list = promotionsList;
+    public void filter (String keySearch) {
+        if (keySearch == null || keySearch.isEmpty()) {
+            list = list_search;
+        } else {
+            List<Promotions> promotionsList = new ArrayList<>();
+            for (Promotions promotion : list_search) {
+                if (promotion.code.toLowerCase().contains(keySearch.toLowerCase()) ||
+                        promotion.title.toLowerCase().contains(keySearch.toLowerCase())
+                        || promotion.id.contains(keySearch.toLowerCase())) {
+                    promotionsList.add(promotion);
                 }
-                FilterResults filterResults = new FilterResults();
-                filterResults.values = list;
-                return filterResults;
+                list = promotionsList;
             }
-
-            @Override
-            protected void publishResults(CharSequence constraint, FilterResults results) {
-                list = (List<Promotions>) results.values;
+            if (list.isEmpty()) {
                 notifyDataSetChanged();
             }
-        };
+        }
     }
 
     @NonNull

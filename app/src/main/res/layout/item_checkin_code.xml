@@ -11,7 +11,7 @@
         android:textColor="@color/color_a"
         android:text="@string/app_name"
         android:textStyle="bold"
-        android:textSize="16dp" />
+        android:textSize="14dp" />
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"

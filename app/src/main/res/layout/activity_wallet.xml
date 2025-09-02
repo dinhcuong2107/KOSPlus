@@ -36,7 +36,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Wallet' User name"
+                    android:text="@={wallet.userName}"
                     android:textSize="16dp"
                     android:textStyle="bold"/>
                 <TextView
@@ -57,7 +57,7 @@
             <androidx.appcompat.widget.AppCompatButton
                 android:layout_width="160dp"
                 android:layout_height="40dp"
-                android:background="@drawable/custom_background_button_agree"
+                android:background="@drawable/custom_background_noborder"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentBottom="true"
                 android:text="Nạp"

@@ -1,10 +1,13 @@
 package com.example.kosplus.adapter;
 
+import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.ObservableField;
@@ -79,54 +82,66 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ItemProductCar
                 Products p;
                 p = snapshot.getValue(Products.class);
                 if (p == null) return;
+                if (p.status) {
+                    product.set(p);
+                    holder.binding.name.setText(p.name);
+                    holder.binding.description.setText(p.description);
+                    Picasso.get().load(p.imageUrl).into(holder.binding.imageView);
 
-                product.set(p);
-                holder.binding.name.setText(p.name);
-                holder.binding.description.setText(p.description);
-                Picasso.get().load(p.imageUrl).into(holder.binding.imageView);
+                    // Lấy thời gian mạng
+                    new Thread(() -> {
+                        long internetTime = Utils.getInternetTimeMillis();
+                        if (internetTime <= 0) return;
 
-                // Lấy thời gian mạng
-                new Thread(() -> {
-                    long internetTime = Utils.getInternetTimeMillis();
-                    if (internetTime <= 0) return;
+                        String timeString = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                                .format(new Date(internetTime));
 
-                    String timeString = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                            .format(new Date(internetTime));
+                        new Handler(Looper.getMainLooper()).post(() -> {
+                            if (p.promotion == null || p.promotion.isEmpty()) {
+                                finalPrice.set(p.price);
+                                holder.binding.total.setText(Utils.formatCurrencyVND(finalPrice.get()));
+                            } else {
+                                DatabaseReference promoRef = FirebaseDatabase.getInstance()
+                                        .getReference("KOS Plus").child("Promotions").child(p.promotion);
 
-                    new Handler(Looper.getMainLooper()).post(() -> {
-                        if (p.promotion == null || p.promotion.isEmpty()) {
-                            finalPrice.set(p.price);
-                            holder.binding.total.setText(""+finalPrice.get());
-                        } else {
-                            DatabaseReference promoRef = FirebaseDatabase.getInstance()
-                                    .getReference("KOS Plus").child("Promotions").child(p.promotion);
+                                promoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        Promotions promo = snapshot.getValue(Promotions.class);
+                                        int priceToSet = p.price;
 
-                            promoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    Promotions promo = snapshot.getValue(Promotions.class);
-                                    int priceToSet = p.price;
-
-                                    if (promo != null && promo.status &&
-                                            Utils.checkTime(timeString, promo.start_date, promo.end_date)) {
-                                        if ("amount".equals(promo.type)) {
-                                            priceToSet = p.price - promo.discount;
-                                        } else {
-                                            priceToSet = p.price - (p.price * promo.discount / 100);
+                                        if (promo != null && promo.status &&
+                                                Utils.checkTime(timeString, promo.start_date, promo.end_date)) {
+                                            if ("amount".equals(promo.type)) {
+                                                priceToSet = p.price - promo.discount;
+                                            } else {
+                                                priceToSet = p.price - (p.price * promo.discount / 100);
+                                            }
                                         }
+
+                                        finalPrice.set(priceToSet);
+                                        holder.binding.total.setText(Utils.formatCurrencyVND(finalPrice.get()));
                                     }
 
-                                    finalPrice.set(priceToSet);
-                                    holder.binding.total.setText(""+finalPrice.get());
-                                }
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+                                    }
+                                });
+                            }
+                        });
+                    }).start();
+                } else {
+                    holder.binding.name.setText(p.name);
+                    holder.binding.description.setText("Sản phẩm đã hết hàng / ngừng kinh doanh");
+                    holder.binding.description.setTextColor(Color.parseColor("#FF0000"));
+                    Picasso.get().load(p.imageUrl).into(holder.binding.imageView);
 
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
-                                }
-                            });
-                        }
-                    });
-                }).start();
+                    holder.binding.increase.setVisibility(View.GONE);
+                    holder.binding.checkbox.setVisibility(View.GONE);
+
+                }
+
+
             }
 
             @Override
@@ -136,12 +151,12 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ItemProductCar
 
 
         holder.binding.decrease.setOnClickListener(v -> {
-            int quantity = Integer.parseInt(holder.binding.quatity.getText().toString());
+            long quantity = Utils.parseCurrencyVND(holder.binding.quatity.getText().toString());
             if (quantity > 1) {
                 if (holder.binding.checkbox.isChecked()) {
                     quantity--;
                     holder.binding.quatity.setText("" + quantity);
-                    holder.binding.total.setText("" + finalPrice.get() * (quantity));
+                    holder.binding.total.setText(Utils.formatCurrencyVND(finalPrice.get() * (quantity)));
                 }
                 notifyCartChanged();
 
@@ -166,16 +181,16 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ItemProductCar
 
         holder.binding.increase.setOnClickListener(v -> {
             if (holder.binding.checkbox.isChecked()) {
-                int quantity = Integer.parseInt(holder.binding.quatity.getText().toString());
+                long quantity = Utils.parseCurrencyVND(holder.binding.quatity.getText().toString());
                 quantity ++;
                 holder.binding.quatity.setText("" + quantity);
-                holder.binding.total.setText("" + finalPrice.get() * (quantity));
+                holder.binding.total.setText(Utils.formatCurrencyVND(finalPrice.get() * (quantity)));
                 notifyCartChanged();
             }
         });
 
         holder.binding.checkbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            notifyCartChanged();
+                notifyCartChanged();
         });
     }
 
@@ -196,7 +211,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ItemProductCar
                     try {
                         String pid = item.productId;
                         int quantity = Integer.parseInt(holder.binding.quatity.getText().toString());
-                        int price = Integer.parseInt(holder.binding.total.getText().toString());
+                        int price = Integer.parseInt("" + Utils.parseCurrencyVND(holder.binding.total.getText().toString()));
 
                         productIds.add(pid);
                         quantities.add(quantity);

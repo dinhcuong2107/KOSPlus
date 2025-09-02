@@ -1,12 +1,14 @@
 package com.example.kosplus.adapter;
 
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.kosplus.databinding.ItemRewardHistoryBinding;
+import com.example.kosplus.func.Utils;
 import com.example.kosplus.model.RewardHistory;
 import com.example.kosplus.model.Users;
 import com.google.firebase.database.DataSnapshot;
@@ -42,6 +44,11 @@ public class RewardHistoryAdapter extends RecyclerView.Adapter<RewardHistoryAdap
         RewardHistory history = list.get(position);
         holder.binding.textviewTime.setText(history.time);
         holder.binding.textviewReward.setText(history.reward);
+        if (history.usageTime != null) {
+            holder.binding.textviewUsageTime.setText("Đã nhận quà vào " + history.usageTime);
+        } else {
+            holder.binding.textviewUsageTime.setVisibility(View.GONE);
+        }
 
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("KOS Plus");
         reference.child("Users").child(history.userId).addValueEventListener(new ValueEventListener() {
@@ -58,6 +65,12 @@ public class RewardHistoryAdapter extends RecyclerView.Adapter<RewardHistoryAdap
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
+            }
+        });
+
+        holder.binding.layout.setOnClickListener(view -> {
+            if (history.usageTime == null || history.usageTime.isEmpty()) {
+                Utils.showQRDialog(view.getContext(), history.id);
             }
         });
     }

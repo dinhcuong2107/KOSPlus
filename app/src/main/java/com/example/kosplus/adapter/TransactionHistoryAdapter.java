@@ -1,5 +1,6 @@
 package com.example.kosplus.adapter;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -7,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.kosplus.databinding.ItemTransactionBinding;
+import com.example.kosplus.func.Utils;
 import com.example.kosplus.model.TransactionHistory;
 
 import java.util.List;
@@ -38,11 +40,13 @@ public class TransactionHistoryAdapter extends RecyclerView.Adapter<TransactionH
         holder.binding.time.setText(transaction.time);
         String text = "";
         if (transaction.type.equals("deposit") || transaction.type.equals("refund")) {
+            holder.binding.amount.setTextColor(Color.parseColor("#004CFF"));
             text = "+ ";
         } else {
+            holder.binding.amount.setTextColor(Color.parseColor("#FF0000"));
             text = "- ";
         }
-        holder.binding.amount.setText(text + transaction.amount);
+        holder.binding.amount.setText(text + Utils.formatCurrencyVND(transaction.amount));
     }
 
     @Override

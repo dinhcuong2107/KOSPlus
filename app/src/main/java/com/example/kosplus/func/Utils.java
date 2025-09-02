@@ -42,6 +42,7 @@ import com.example.kosplus.databinding.CustomDialogVerificationBinding;
 import com.example.kosplus.datalocal.DataLocalManager;
 import com.example.kosplus.features.ProfileEditActivity;
 import com.example.kosplus.model.Notifications;
+import com.example.kosplus.model.Orders;
 import com.example.kosplus.model.TransactionHistory;
 import com.example.kosplus.model.Users;
 import com.google.firebase.database.DataSnapshot;
@@ -65,6 +66,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CountDownLatch;
 import java.util.regex.Pattern;
 
 public class Utils {
@@ -388,7 +390,6 @@ public class Utils {
             }
         });
     }
-
     public static void showQRDialog(Context context, String string) {
         Dialog dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -465,7 +466,7 @@ public class Utils {
         dialog.setCancelable(false);
 
         // Gán text
-        binding.type.setText(type);
+        binding.headerTitle.setText(type);
         binding.title.setText(title);
         binding.text.setText(content);
 

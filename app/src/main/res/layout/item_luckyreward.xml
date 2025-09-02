@@ -24,6 +24,7 @@
         android:layout_width="80dp"
         android:layout_height="30dp"
         android:text="Xóa"
+        android:textSize="14dp"
         android:textAllCaps="false"
         android:textColor="@color/color_title"
         android:background="@drawable/custom_background_button_cancel"/>

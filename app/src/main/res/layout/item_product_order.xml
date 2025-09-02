@@ -17,17 +17,10 @@
         android:layout_weight="1"
         android:orientation="horizontal">
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=" x "/>
-        <TextView
             android:id="@+id/textquantity"
-            android:layout_width="40dp"
+            android:layout_width="80dp"
+            android:text="x 100.000"
             android:layout_height="wrap_content" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=" = "/>
         <TextView
             android:id="@+id/textprice"
             android:layout_width="match_parent"

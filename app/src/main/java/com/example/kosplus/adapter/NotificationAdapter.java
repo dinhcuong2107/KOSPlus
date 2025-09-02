@@ -46,11 +46,11 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         if (!notification.status) {
             holder.binding.layout.setBackgroundColor(Color.parseColor("#FFFFFF"));
         } else {
-            holder.binding.layout.setBackgroundColor(Color.parseColor("#FEA0C7"));
+            holder.binding.layout.setBackgroundColor(Color.parseColor("#ebfffe"));
         }
 
         if (notification.userId.equals("All")) {
-            holder.binding.layout.setBackgroundColor(Color.parseColor("#FFB6AF"));
+            holder.binding.layout.setBackgroundColor(Color.parseColor("#b8fffc"));
         }
 
         holder.binding.imageView.setOnClickListener(view -> {

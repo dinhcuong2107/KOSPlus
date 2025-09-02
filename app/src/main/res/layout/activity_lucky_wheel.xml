@@ -27,10 +27,31 @@
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/spin"
                 android:layout_width="100dp"
-                android:layout_height="wrap_content"
+                android:layout_height="40dp"
                 android:textAllCaps="false"
                 android:background="@drawable/custom_background_button_agree"
-                android:text="Quay" />
+                android:text="Quay"
+                android:textColor="@color/white"/>
+
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="20dp"/>
+
+            <com.budiyev.android.codescanner.CodeScannerView
+                android:id="@+id/scanner_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnScan"
+                android:layout_width="200dp"
+                android:layout_height="40dp"
+                android:textAllCaps="false"
+                android:background="@drawable/custom_background_button_agree"
+                android:text="Xác nhận phần thưởng"
+                android:textColor="@color/white"
+                />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewRewardHistory"

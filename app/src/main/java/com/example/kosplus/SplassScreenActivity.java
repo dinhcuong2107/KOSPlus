@@ -65,7 +65,7 @@ public class SplassScreenActivity extends AppCompatActivity {
                 .start();
         // Chuyển sau 3 giây
         new Handler().postDelayed(() -> {
-            startActivity(new Intent(this, LoginActivity.class));
+            startActivity(new Intent(this, MainActivity.class));
             finish();
         }, 3000);
     }

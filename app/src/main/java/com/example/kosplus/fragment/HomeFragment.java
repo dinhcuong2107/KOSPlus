@@ -59,13 +59,6 @@ public class HomeFragment extends Fragment {
 
         Log.d("KOS Plus", "OneSignalDebug Subscription ID (Player ID): " + OneSignal.getUser().getPushSubscription().getId());
 
-        binding.test.setOnClickListener( view -> {
-
-//            OneSignalNotification.sendNotificationToAllUsers( "Thông báo từ hệ thống", "Thông báo thử nghiệm");
-
-            OneSignalNotification.sendNotificationToUser("a7d3e137-e51c-4fdb-8300-6ef150ec22f9", "Thông báo cá nhân thử nghiệm", "Thông báo cá nhân");
-        });
-
         bannerList = new ArrayList<>();
 
         binding.viewpager.setOffscreenPageLimit(3);

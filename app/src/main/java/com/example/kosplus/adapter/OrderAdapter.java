@@ -18,6 +18,7 @@ import android.widget.Filterable;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.databinding.ObservableField;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -44,7 +45,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ItemOrderViewHolder> implements Filterable {
+public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ItemOrderViewHolder> {
     private List<Orders> list, list_search;
     public OrderAdapter(List<Orders> list) {
         this.list = list;
@@ -57,36 +58,23 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ItemOrderVie
         notifyDataSetChanged();
     }
 
-    @Override
-    public Filter getFilter() {
-        return new Filter() {
-            @Override
-            protected FilterResults performFiltering(CharSequence constraint) {
-                String keySearch = constraint.toString();
-                if (keySearch.isEmpty()) {
-                    list = list_search;
-                } else {
-                    List<Orders> ordersList = new ArrayList<>();
-                    for (Orders orders : list_search) {
-                        if (orders.address.toLowerCase().contains(keySearch.toLowerCase()) ||
-                                orders.userId.contains(keySearch)
-                                || orders.id.contains(keySearch)) {
-                            ordersList.add(orders);
-                        }
-                    }
-                    list = ordersList;
+    public void filter (String keySearch) {
+        if (keySearch == null || keySearch.isEmpty()) {
+            list = list_search;
+        } else {
+            List<Orders> ordersList = new ArrayList<>();
+            for (Orders orders : list_search) {
+                if (orders.address.toLowerCase().contains(keySearch.toLowerCase()) ||
+                        orders.userId.contains(keySearch)
+                        || orders.id.contains(keySearch)) {
+                    ordersList.add(orders);
                 }
-                FilterResults filterResults = new FilterResults();
-                filterResults.values = list;
-                return filterResults;
             }
-
-            @Override
-            protected void publishResults(CharSequence constraint, FilterResults results) {
-                list = (List<Orders>) results.values;
-                notifyDataSetChanged();
-            }
-        };
+            list = ordersList;
+        }
+        if (list != null) {
+            notifyDataSetChanged();
+        }
     }
 
     @NonNull
@@ -106,17 +94,21 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ItemOrderVie
         holder.binding.textOrderTotal.setText("Tổng tiền: "+Utils.formatCurrencyVND(order.total));
 
 
-        if (order.cancelledTime != null && !order.cancelledTime.isEmpty()) {
+        if (order.canceledTime != null && !order.canceledTime.isEmpty()) {
             holder.binding.textOrderStatus.setText("Đã hủy");
             holder.binding.textOrderStatus.setTextColor(Color.parseColor("#FF0000"));
         } else if (order.completedTime != null && !order.completedTime.isEmpty()) {
             holder.binding.textOrderStatus.setText("Đã hoàn thành");
+            holder.binding.textOrderStatus.setTextColor(Color.parseColor("#0099D9"));
         } else if (order.deliveryTime != null && !order.deliveryTime.isEmpty()) {
             holder.binding.textOrderStatus.setText("Đang giao");
+            holder.binding.textOrderStatus.setTextColor(Color.parseColor("#0099D9"));
         } else if (order.confirmedTime != null && !order.confirmedTime.isEmpty()) {
             holder.binding.textOrderStatus.setText("Đã xác nhận");
+            holder.binding.textOrderStatus.setTextColor(Color.parseColor("#0099D9"));
         } else {
             holder.binding.textOrderStatus.setText("Chờ xác nhận");
+            holder.binding.textOrderStatus.setTextColor(Color.parseColor("#0099D9"));
         }
 
         holder.binding.textOrderDetail.setOnClickListener(v -> {
@@ -182,44 +174,36 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ItemOrderVie
                     orderDetailBinding.cancelOrder.setVisibility(View.VISIBLE);
                 }
 
-                if (order.cancelledTime == null || order.cancelledTime.isEmpty()) {
+                if (order.canceledTime != null && !order.canceledTime.isEmpty()) {
+                    orderDetailBinding.textCancel.setText("Đã hủy:\n" + order.canceledTime);
+                    orderDetailBinding.textcancelReason.setText("Lý do: "+ order.canceledReason);
+                }else {
                     orderDetailBinding.textCancel.setVisibility(View.GONE);
                     orderDetailBinding.textcancelReason.setVisibility(View.GONE);
-                }else {
-                    orderDetailBinding.textCancel.setText("Đã hủy:\n" + order.cancelledTime);
-                    orderDetailBinding.textcancelReason.setText("Lý do: "+ order.cancelledReason);
-
-                    orderDetailBinding.spinner.setVisibility(View.GONE);
-                    orderDetailBinding.cancelOrder.setVisibility(View.GONE);
                 }
             } else {
-                if (order.cancelledTime == null || order.cancelledTime.isEmpty()) {
+                // Trường hợp nhân viên, quản lý và admin
+                if (order.canceledTime != null && !order.canceledTime.isEmpty()) {
+                    orderDetailBinding.textCancel.setText("Đã hủy:\n" + order.canceledTime);
+                    orderDetailBinding.textcancelReason.setText("Lý do: "+ order.canceledReason);
+                } else {
                     orderDetailBinding.textCancel.setVisibility(View.GONE);
                     orderDetailBinding.textcancelReason.setVisibility(View.GONE);
-                } else {
-                    orderDetailBinding.textCancel.setText("Đã hủy:\n" + order.cancelledTime);
-                    orderDetailBinding.textcancelReason.setText("Lý do: "+ order.cancelledReason);
-
-                    orderDetailBinding.spinner.setVisibility(View.GONE);
-                    orderDetailBinding.cancelOrder.setVisibility(View.GONE);
                 }
+
                 if (order.confirmedTime != null && !order.confirmedTime.isEmpty()) {
                     orderDetailBinding.textConfirmed.setText("Đã xác nhận:\n" + order.confirmedTime);
-                    orderDetailBinding.textConfirmed.setClickable(false);
 
                     orderDetailBinding.spinner.setVisibility(View.GONE);
                     orderDetailBinding.cancelOrder.setVisibility(View.GONE);
                 }
-                if (order.deliveryTime != null || !order.deliveryTime.isEmpty()) {
+                if (order.deliveryTime != null && !order.deliveryTime.isEmpty()) {
                     orderDetailBinding.textDelivery.setText("Đang giao:\n" + order.deliveryTime);
-
-                    orderDetailBinding.textConfirmed.setClickable(false);
-                    orderDetailBinding.textDelivery.setClickable(false);
 
                     orderDetailBinding.spinner.setVisibility(View.VISIBLE);
                     orderDetailBinding.cancelOrder.setVisibility(View.VISIBLE);
                 }
-                if (order.completedTime != null || !order.completedTime.isEmpty()) {
+                if (order.completedTime != null && !order.completedTime.isEmpty()) {
                     orderDetailBinding.textCompleted.setText("Đã hoàn thành:\n" + order.completedTime);
 
                     orderDetailBinding.textConfirmed.setClickable(false);
@@ -254,74 +238,113 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ItemOrderVie
             orderDetailBinding.recyclerView.setAdapter(adapter);
 
             orderDetailBinding.textConfirmed.setOnClickListener(view -> {
-                if (DataLocalManager.getRole().equals("Customer") || order.confirmedTime != null || !order.confirmedTime.isEmpty()) {return;}
-                Utils.showVerificationDialog(v.getContext(), "veryfication","Xác nhận đơn hàng", "" + order.id,  () -> {
-                    DatabaseReference orderReference = FirebaseDatabase.getInstance().getReference("KOS Plus")
-                            .child("Orders")
-                            .child(order.id)
-                            .child("confirmedTime");
-                    new Thread(() -> {
-                        long internetTime = Utils.getInternetTimeMillis();
-                        if (internetTime > 0) {
-                            String timeString = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy", Locale.getDefault())
-                                    .format(new Date(internetTime));
-                            Log.d("REAL_TIME", "Thời gian Internet: " + timeString);
-                            orderReference.setValue(timeString);
+                if (!DataLocalManager.getRole().equals("Customer")) {
+                    if (order.confirmedTime == null || order.confirmedTime.isEmpty()) {
+                        Utils.showVerificationDialog(v.getContext(), "veryfication","Xác nhận đơn hàng", "" + order.id,  () -> {
+                            DatabaseReference orderReference = FirebaseDatabase.getInstance().getReference("KOS Plus")
+                                    .child("Orders")
+                                    .child(order.id)
+                                    .child("confirmedTime");
+                            new Thread(() -> {
+                                long internetTime = Utils.getInternetTimeMillis();
+                                if (internetTime > 0) {
+                                    String timeString = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy", Locale.getDefault())
+                                            .format(new Date(internetTime));
+                                    Log.d("REAL_TIME", "Thời gian Internet: " + timeString);
+                                    orderReference.setValue(timeString);
 
-                            Utils.pushNotification("", "Đơn hàng đã được xác nhận", "Mã đơn hàng: " + order.id, DataLocalManager.getUid() ,""+timeString);
-                            OneSignalNotification.sendNotificationToUser(order.userId, "Đơn hàng đã được xác nhận", "Thời gian xác nhận" + timeString);
-                            dialog.dismiss();
-                        }
-                    }).start();
-                });
+                                    Utils.pushNotification("", "Đơn hàng đã được xác nhận", "Mã đơn hàng: " + order.id, order.userId ,""+timeString);
+                                    OneSignalNotification.sendNotificationToUser(order.userId, "Đơn hàng đã được xác nhận", "Thời gian xác nhận" + timeString);
+                                    dialog.dismiss();
+                                }
+                            }).start();
+                        });
+                    }
+                }
+
             });
 
             orderDetailBinding.textDelivery.setOnClickListener(view -> {
-                if (DataLocalManager.getRole().equals("Customer") || order.deliveryTime != null || !order.deliveryTime.isEmpty()) {return;}
-                Utils.showVerificationDialog(v.getContext(), "veryfication","Xác nhận đang giao hàng", "" + order.id,  () -> {
-                    DatabaseReference orderReference = FirebaseDatabase.getInstance().getReference("KOS Plus")
-                            .child("Orders")
-                            .child(order.id)
-                            .child("deliveryTime");
-                    new Thread(() -> {
-                        long internetTime = Utils.getInternetTimeMillis();
-                        if (internetTime > 0) {
-                            String timeString = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy", Locale.getDefault())
-                                    .format(new Date(internetTime));
-                            Log.d("REAL_TIME", "Thời gian Internet: " + timeString);
-                            orderReference.setValue(timeString);
+                if (!DataLocalManager.getRole().equals("Customer")) {
+                    if (order.deliveryTime == null || order.deliveryTime.isEmpty()) {
+                        Utils.showVerificationDialog(v.getContext(), "veryfication","Xác nhận đang giao hàng", "" + order.id,  () -> {
+                            DatabaseReference orderReference = FirebaseDatabase.getInstance().getReference("KOS Plus")
+                                    .child("Orders")
+                                    .child(order.id)
+                                    .child("deliveryTime");
+                            new Thread(() -> {
+                                long internetTime = Utils.getInternetTimeMillis();
+                                if (internetTime > 0) {
+                                    String timeString = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy", Locale.getDefault())
+                                            .format(new Date(internetTime));
+                                    Log.d("REAL_TIME", "Thời gian Internet: " + timeString);
+                                    orderReference.setValue(timeString);
 
-                            Utils.pushNotification("", "Đơn hàng đang được giao", "Mã đơn hàng: " + order.id, DataLocalManager.getUid() ,""+timeString);
-                            OneSignalNotification.sendNotificationToUser(order.userId, "Đơn hàng đang được giao", "Thời gian xác nhận" + timeString);
+                                    Utils.pushNotification("", "Đơn hàng đang được giao", "Mã đơn hàng: " + order.id, order.userId ,""+timeString);
+                                    OneSignalNotification.sendNotificationToUser(order.userId, "Đơn hàng đang được giao", "Thời gian xác nhận" + timeString);
 
-                            dialog.dismiss();
-                        }
-                    }).start();
-                });
+                                    dialog.dismiss();
+                                }
+                            }).start();
+                        });
+                    }
+                }
+
             });
 
             orderDetailBinding.textCompleted.setOnClickListener(view -> {
-                if (DataLocalManager.getRole().equals("Customer") || order.completedTime != null || !order.completedTime.isEmpty()) {return;}
-                Utils.showVerificationDialog(v.getContext(), "veryfication","Xác nhận hoàn thành đơn hàng", "" + order.id,  () -> {
-                    DatabaseReference orderReference = FirebaseDatabase.getInstance().getReference("KOS Plus")
-                            .child("Orders")
-                            .child(order.id)
-                            .child("completedTime");
-                    new Thread(() -> {
-                        long internetTime = Utils.getInternetTimeMillis();
-                        if (internetTime > 0) {
-                            String timeString = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy", Locale.getDefault())
-                                    .format(new Date(internetTime));
-                            Log.d("REAL_TIME", "Thời gian Internet: " + timeString);
-                            orderReference.setValue(timeString);
 
-                            Utils.pushNotification("", "Đơn hàng đã hoàn thành", "Mã đơn hàng: " + order.id, DataLocalManager.getUid() ,""+timeString);
-                            OneSignalNotification.sendNotificationToUser(order.userId, "Đơn hàng đã hoàn thành", "Thời gian xác nhận" + timeString);
+                ObservableField<Integer> quantityTicket = new ObservableField<>();
 
-                            dialog.dismiss();
+                DatabaseReference ref2 = FirebaseDatabase.getInstance().getReference("KOS Plus").child("Ticket").child(order.userId);
+                ref2.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            quantityTicket.set(snapshot.getValue(Integer.class));
+                        } else {
+                            ref2.setValue(0);
+                            quantityTicket.set(0);
                         }
-                    }).start();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
                 });
+
+                if (!DataLocalManager.getRole().equals("Customer")) {
+                    if (order.completedTime == null || order.completedTime.isEmpty()) {
+                        Utils.showVerificationDialog(v.getContext(), "veryfication","Xác nhận hoàn thành đơn hàng", "" + order.id,  () -> {
+                            DatabaseReference orderReference = FirebaseDatabase.getInstance().getReference("KOS Plus")
+                                    .child("Orders")
+                                    .child(order.id)
+                                    .child("completedTime");
+                            new Thread(() -> {
+                                long internetTime = Utils.getInternetTimeMillis();
+                                if (internetTime > 0) {
+                                    String timeString = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy", Locale.getDefault())
+                                            .format(new Date(internetTime));
+                                    Log.d("REAL_TIME", "Thời gian Internet: " + timeString);
+                                    orderReference.setValue(timeString);
+
+                                    // Nếu tổng tiền > 300.000 thì cộng thêm 1 vé quay
+                                    if (order.total > 300000) {
+                                        ref2.setValue(quantityTicket.get() + 1);
+                                        Utils.pushNotification("", "Bạn nhận được 1 vé quay thưởng", "Quay thưởng ngay để nhận quà tặng", order.userId ,""+timeString);
+                                        OneSignalNotification.sendNotificationToUser(order.userId, "Bạn nhận được 1 vé quay thưởng", "Quay thưởng ngay để nhận quà tặng");
+                                    }
+
+                                    Utils.pushNotification("", "Đơn hàng đã hoàn thành", "Mã đơn hàng: " + order.id, order.userId ,""+timeString);
+                                    OneSignalNotification.sendNotificationToUser(order.userId, "Đơn hàng đã hoàn thành", "Thời gian xác nhận" + timeString);
+
+                                    dialog.dismiss();
+                                }
+                            }).start();
+                        });
+                    }
+                }
             });
 
             orderDetailBinding.cancelOrder.setOnClickListener(view -> {
@@ -346,7 +369,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ItemOrderVie
                                     orderReference.child("cancelReason").setValue(selectedReason);
                                     orderReference.child("status").setValue(false);
 
-                                    Utils.pushNotification("", "Đơn hàng đã được hủy", "Mã đơn hàng: " + order.id + "\nLý do " + selectedReason, DataLocalManager.getUid(), "" + timeString);
+                                    Utils.pushNotification("", "Đơn hàng đã được hủy", "Mã đơn hàng: " + order.id + "\nLý do " + selectedReason, order.userId, "" + timeString);
                                     OneSignalNotification.sendNotificationToUser(order.userId, "Đơn hàng đã được hủy", "Thời gian hủy" + timeString + "\nLý do " + selectedReason);
 
                                     dialog.dismiss();

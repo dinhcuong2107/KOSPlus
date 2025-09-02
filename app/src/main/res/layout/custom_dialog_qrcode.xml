@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="20dp"
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="20dp"
         android:background="@drawable/custom_background_border"
@@ -48,11 +48,31 @@
             android:id="@+id/cancel"
             android:layout_width="150dp"
             android:layout_height="match_parent"
-            android:text="Đóng"
-            android:textSize="18dp"
-            android:textStyle="bold"
-            android:textColor="@color/color_title"
             android:background="@drawable/custom_background_button_cancel"
+            android:text="Đóng"
+            android:textAllCaps="false"
+            android:textColor="@color/color_title"
+            android:textStyle="bold" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="-20dp"
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/header_title"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginLeft="20dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:text="QR CODE"
+            android:textColor="@color/color_title"
+            android:textStyle="bold"
+            android:background="@drawable/custom_background_header"
             android:textAllCaps="false" />
     </LinearLayout>
 </RelativeLayout>

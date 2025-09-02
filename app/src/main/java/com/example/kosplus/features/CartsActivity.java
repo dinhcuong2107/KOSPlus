@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.kosplus.R;
 import com.example.kosplus.adapter.CartAdapter;
 import com.example.kosplus.databinding.ActivityCartsBinding;
+import com.example.kosplus.func.Utils;
 import com.example.kosplus.livedata.ItemCartsLiveData;
 import com.example.kosplus.model.Shops;
 import com.google.firebase.database.DataSnapshot;
@@ -55,7 +56,7 @@ public class CartsActivity extends AppCompatActivity {
                 int total = 0;
                 for (int p : finalPrices) total += p;
 
-                binding.done.setText("Mua (" + total + "VNĐ)");
+                binding.done.setText("Mua " + Utils.formatCurrencyVND(total));
 
                 // Nếu muốn dùng khi thanh toán
                 viewModel.setData(productIds, quantities, finalPrices);

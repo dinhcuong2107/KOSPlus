@@ -36,6 +36,7 @@ import com.example.kosplus.features.CartsActivity;
 import com.example.kosplus.features.ProductEditActivity;
 import com.example.kosplus.func.Utils;
 import com.example.kosplus.model.ItemCarts;
+import com.example.kosplus.model.Orders;
 import com.example.kosplus.model.Products;
 import com.example.kosplus.model.Promotions;
 import com.google.firebase.database.DataSnapshot;
@@ -48,13 +49,18 @@ import com.squareup.picasso.Picasso;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class ProductVerticalAdapter extends RecyclerView.Adapter<ProductVerticalAdapter.ProductViewHolder> {
     List<Products> list;
+    private Map<String, Integer> soldMap = new HashMap<>();
+    private DatabaseReference ordersRef = FirebaseDatabase.getInstance().getReference("KOS Plus").child("Orders");
     public ProductVerticalAdapter(List<Products> list) {
         this.list = list;
+        loadSoldData();
         notifyDataSetChanged();
     }
 
@@ -62,6 +68,35 @@ public class ProductVerticalAdapter extends RecyclerView.Adapter<ProductVertical
         this.list = list;
         notifyDataSetChanged();
     }
+
+    // 🔹 Load toàn bộ số lượng đã bán của tất cả sản phẩm
+    private void loadSoldData() {
+        ordersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                soldMap.clear();
+                for (DataSnapshot orderSnap : snapshot.getChildren()) {
+                    Orders order = orderSnap.getValue(Orders.class);
+
+                    if (order != null && order.completedTime != null && !order.completedTime.isEmpty()) {
+
+                        // duyệt qua danh sách sản phẩm trong đơn hàng
+                        for (int i = 0; i < order.productId.size(); i++) {
+                            String productId = order.productId.get(i);
+                            int quantity = order.quantity.get(i);
+
+                            soldMap.put(productId, soldMap.getOrDefault(productId, 0) + quantity);
+                        }
+                    }
+                }
+                notifyDataSetChanged(); // 🔥 cập nhật lại danh sách sau khi load xong
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
+    }
+
     @NonNull
     @Override
     public ProductViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -79,7 +114,7 @@ public class ProductVerticalAdapter extends RecyclerView.Adapter<ProductVertical
 
         if (product.promotion == null || product.promotion.isEmpty() || product.promotion.equals("")) {
             holder.binding.price.setVisibility(GONE);
-            holder.binding.finalPrice.setText(product.price + " VNĐ");
+            holder.binding.finalPrice.setText(Utils.formatCurrencyVND(product.price));
         } else {
             new Thread(() -> {
                 long internetTime = Utils.getInternetTimeMillis();
@@ -212,6 +247,14 @@ public class ProductVerticalAdapter extends RecyclerView.Adapter<ProductVertical
         productDetailBinding.description.setText("[ "+product.type+" ]"+ "\n" +product.description);
         productDetailBinding.category.setText(product.category);
 
+        // 🔹 Lấy số lượng đã bán từ Map
+        int soldQuantity = soldMap.getOrDefault(product.id, 0);
+        if (soldQuantity == 0) {
+            productDetailBinding.quantity.setText("New");
+        }else {
+            productDetailBinding.quantity.setText("Đã bán: " + soldQuantity);
+        }
+
         if (product.status) {
             productDetailBinding.status.setText("Còn hàng");
         } else {
@@ -229,8 +272,12 @@ public class ProductVerticalAdapter extends RecyclerView.Adapter<ProductVertical
                 productDetailBinding.promotionconnect.setVisibility(VISIBLE);
             }
 
+
+            productDetailBinding.promotion.setVisibility(GONE);
+            productDetailBinding.promotionStatus.setVisibility(GONE);
             productDetailBinding.price.setVisibility(GONE);
             productDetailBinding.finalPrice.setText(Utils.formatCurrencyVND(product.price));
+            productDetailBinding.promotionconnect.setVisibility(GONE);
         } else {
             if (DataLocalManager.getRole().equals("Admin"))
             {

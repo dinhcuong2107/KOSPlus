@@ -1,5 +1,7 @@
 package com.example.kosplus.features;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -8,9 +10,11 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProviders;
@@ -18,10 +22,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bluehomestudio.luckywheel.WheelItem;
+import com.budiyev.android.codescanner.CodeScanner;
 import com.example.kosplus.R;
 import com.example.kosplus.adapter.LuckyRewardAdapter;
 import com.example.kosplus.adapter.RewardHistoryAdapter;
 import com.example.kosplus.databinding.ActivityLuckyWheelBinding;
+import com.example.kosplus.datalocal.DataLocalManager;
 import com.example.kosplus.func.Utils;
 import com.example.kosplus.livedata.LuckyRewardsLiveData;
 import com.example.kosplus.livedata.RewardHistoriesLiveData;
@@ -37,7 +43,9 @@ public class LuckyWheelActivity extends AppCompatActivity {
     private List<WheelItem> wheelItems;
     private List<LuckyRewards> list;
     private int targetIndex;
-    private List<String> colors = Arrays.asList("#FFB16E","#FF6F61", "#6EC6FF","#A3D977","#D1C4E9","#F5E79E");
+    private CodeScanner mCodeScanner;
+    private List<String> colors = Arrays.asList("#FFB16E", "#FF6F61", "#6EC6FF", "#A3D977", "#D1C4E9", "#F5E79E");
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,6 +54,25 @@ public class LuckyWheelActivity extends AppCompatActivity {
         LuckyWheelVM viewModel = new LuckyWheelVM();
         binding.setLuckywheel(viewModel);
         binding.setLifecycleOwner(this);
+
+        mCodeScanner = new CodeScanner(this, binding.scannerView);
+
+        mCodeScanner.setDecodeCallback(result -> runOnUiThread(() -> {
+            if (result.getText() == null || result.getText().trim().isEmpty()) {
+                Toast.makeText(this, "Không quét được mã QR, vui lòng thử lại!", Toast.LENGTH_SHORT).show();
+            } else {
+                Log.d("Scan result", result.getText());
+                mCodeScanner.stopPreview();
+                viewModel.saveUsageTimeReward(binding.getRoot(), result.getText());
+                binding.scannerView.setVisibility(View.GONE);
+            }
+        }));
+
+        if (DataLocalManager.getRole().equals("Customer")) {
+            binding.btnScan.setVisibility(View.GONE);
+        } else {
+            binding.btnScan.setVisibility(View.VISIBLE);
+        }
 
         Drawable drawable = ContextCompat.getDrawable(this, R.drawable.giftcard_24);
         Bitmap icon;
@@ -86,10 +113,10 @@ public class LuckyWheelActivity extends AppCompatActivity {
         RewardHistoryAdapter historyAdapter = new RewardHistoryAdapter(new ArrayList<>());
         binding.recyclerViewRewardHistory.setAdapter(historyAdapter);
         binding.recyclerViewRewardHistory.animate().alpha(0f).setDuration(150).withEndAction(() -> {
-                    historyAdapter.notifyDataSetChanged();
-                    binding.recyclerViewRewardHistory.setAlpha(0f);
-                    binding.recyclerViewRewardHistory.animate().alpha(1f).setDuration(150).start();
-                }).start();
+            historyAdapter.notifyDataSetChanged();
+            binding.recyclerViewRewardHistory.setAlpha(0f);
+            binding.recyclerViewRewardHistory.animate().alpha(1f).setDuration(150).start();
+        }).start();
 
         // Quan sát dữ liệu từ LiveData
         RewardHistoriesLiveData historyLiveData = ViewModelProviders.of(this).get(RewardHistoriesLiveData.class);
@@ -125,8 +152,8 @@ public class LuckyWheelActivity extends AppCompatActivity {
                 binding.recyclerView.setVisibility(View.VISIBLE);
                 list = key;
                 wheelItems = new ArrayList<>();
-                for (int i=0; i< key.size(); i++) {
-                    wheelItems.add(new WheelItem(Color.parseColor(""+colors.get(i)), icon, ""+key.get(i).reward));
+                for (int i = 0; i < key.size(); i++) {
+                    wheelItems.add(new WheelItem(Color.parseColor("" + colors.get(i)), icon, "" + key.get(i).reward));
                 }
                 binding.luckyWheel.addWheelItems(wheelItems);
             } else {
@@ -136,20 +163,35 @@ public class LuckyWheelActivity extends AppCompatActivity {
 
         binding.spin.setOnClickListener(v -> {
 
-            targetIndex = getWeightedIndex(list);
-            Log.d("LuckyWheel", "Selected index: " + targetIndex + " - " + list.get(targetIndex).reward);
-            binding.luckyWheel.rotateWheelTo(targetIndex+1);
+            if (viewModel.quantityTicket.get() > 0 ) {
+                targetIndex = getWeightedIndex(list);
+                Log.d("LuckyWheel", "Selected index: " + targetIndex + " - " + list.get(targetIndex).reward);
+                binding.luckyWheel.rotateWheelTo(targetIndex + 1);
+            } else {
+                Toast.makeText(this, "Bạn không có vé!", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        binding.btnScan.setOnClickListener(v -> {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 101);
+            } else {
+                binding.scannerView.setVisibility(View.VISIBLE);
+                mCodeScanner.startPreview(); // Bắt đầu quét
+            }
         });
 
         binding.luckyWheel.setLuckyWheelReachTheTarget(() -> {
             String reward = list.get(targetIndex).reward;
 
-            Utils.showNotificationDialog(this, "","Thông báo", "Bạn đã trúng " + reward);
+            Utils.showNotificationDialog(this, "", "Thông báo", "Bạn đã trúng " + reward);
             // TODO: Firebase
             viewModel.saveRewardToFirebase(reward);
         });
 
     }
+
     private int getWeightedIndex(List<LuckyRewards> list) {
         int totalWeight = 0;
 
@@ -168,5 +210,17 @@ public class LuckyWheelActivity extends AppCompatActivity {
         }
 
         return 0; // fallback nếu lỗi
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mCodeScanner.startPreview();
+    }
+
+    @Override
+    protected void onPause() {
+        mCodeScanner.releaseResources();
+        super.onPause();
     }
 }

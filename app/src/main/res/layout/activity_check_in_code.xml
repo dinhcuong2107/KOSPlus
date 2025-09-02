@@ -12,6 +12,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="24dp"
+        android:gravity="center|top"
         android:orientation="vertical">
         <TextView
             android:layout_width="match_parent"
@@ -25,9 +27,13 @@
             android:text="@={checkinCode.status}"/>
 
         <androidx.appcompat.widget.AppCompatButton
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingLeft="24dp"
+            android:paddingRight="24dp"
+            android:background="@drawable/custom_background_button_agree"
             android:text="Tạo check in code"
+            android:textColor="@color/white"
             android:textAllCaps="false"
             android:visibility="@{checkinCode.status != null ? View.VISIBLE : View.GONE}"
             android:onClick="@{(view) -> checkinCode.generateDailyCheckinKeys(view)}" />
@@ -51,6 +57,8 @@
                 <androidx.appcompat.widget.AppCompatButton
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="@drawable/custom_background_button_agree"
+                    android:textColor="@color/white"
                     android:layout_weight="1"
                     android:text="QR check in"
                     android:textAllCaps="false"

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:padding="10dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -10,43 +9,15 @@
         android:id="@+id/layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="20dp"
         android:background="@drawable/custom_background_border"
         android:padding="10dp"
         android:orientation="vertical"
         android:gravity="center"
         tools:layout_editor_absoluteX="20dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center">
-
-            <ImageButton
-                android:id="@+id/cancel"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/custom_background_button_cancel"
-                android:src="@drawable/rounded_close_24"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:textSize="18dp"
-                android:textStyle="bold"
-                android:textColor="@color/color_title"
-                android:text="Chi tiết đơn hàng"/>
-
-            <ImageButton
-                android:id="@+id/favorite"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                app:tint="#FF0000"
-                android:background="@drawable/custom_background_button_cancel"
-                android:src="@drawable/rounded_star_24"/>
-        </LinearLayout>
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"/>
 
         <TextView
             android:id="@+id/text_order_id"
@@ -92,7 +63,8 @@
             android:layout_height="wrap_content"
             android:textStyle="bold"
             android:textSize="18dp"
-            android:text="thành tiền"/>
+            android:textColor="#E91E63"
+            android:text="100.000 VNĐ"/>
         <TextView
             android:id="@+id/textPaymentMenthod"
             android:layout_width="wrap_content"
@@ -250,7 +222,7 @@
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/cancelOrder"
                 android:layout_width="100dp"
-                android:layout_height="wrap_content"
+                android:layout_height="40dp"
                 android:text="Hủy"
                 android:textColor="@color/color_title"
                 android:background="@drawable/custom_background_button_cancel"
@@ -260,5 +232,49 @@
             android:id="@+id/imageView"
             android:layout_width="300dp"
             android:layout_height="300dp"/>
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"/>
     </LinearLayout>
-</ScrollView>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="-20dp"
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/header_title"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginLeft="20dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:text="chi tiết"
+            android:textColor="@color/color_title"
+            android:textStyle="bold"
+            android:background="@drawable/custom_background_header"
+            android:textAllCaps="false" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_alignBottom="@+id/layout"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
+        android:layout_marginBottom="-20dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/cancel"
+            android:layout_width="150dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/custom_background_button_cancel"
+            android:text="Đóng"
+            android:textAllCaps="false"
+            android:textColor="@color/color_title"
+            android:textStyle="bold" />
+    </LinearLayout>
+</RelativeLayout>

@@ -23,6 +23,7 @@
                 android:layout_height="wrap_content"
                 android:text="Thêm tin sản phẩm"
                 android:textSize="18dp"
+                android:paddingTop="14dp"
                 android:textStyle="bold"
                 android:textColor="@color/color_title"/>
 
@@ -125,6 +126,8 @@
                 android:layout_height="40dp"
                 android:textAllCaps="false"
                 android:text="Cập nhật"
+                android:textColor="@color/white"
+                android:layout_marginTop="4dp"
                 android:onClick="@{(view) -> productEdit.onProductUpdate(view)}"
                 android:background="@drawable/custom_background_button_agree"/>
 
@@ -133,6 +136,8 @@
                 android:layout_height="40dp"
                 android:textAllCaps="false"
                 android:text="Ngừng kinh doanh"
+                android:textColor="@color/white"
+                android:layout_marginTop="4dp"
                 android:visibility="@{productEdit.product.status ? View.VISIBLE : View.GONE}"
                 android:onClick="@{(view) -> productEdit.onLock(view)}"
                 android:background="@drawable/custom_background_button_agree"/>
@@ -142,6 +147,8 @@
                 android:layout_height="40dp"
                 android:textAllCaps="false"
                 android:text="Mở bán"
+                android:textColor="@color/white"
+                android:layout_marginTop="4dp"
                 android:visibility="@{productEdit.product.status ? View.GONE : View.VISIBLE}"
                 android:onClick="@{(view) -> productEdit.onUnLock(view)}"
                 android:background="@drawable/custom_background_button_agree"/>
@@ -150,6 +157,8 @@
                 android:layout_height="40dp"
                 android:textAllCaps="false"
                 android:text="Xóa sản phẩm"
+                android:textColor="@color/white"
+                android:layout_marginTop="4dp"
                 android:onClick="@{(view) -> productEdit.onDelete(view)}"
                 android:background="@drawable/custom_background_button_agree"/>
         </LinearLayout>

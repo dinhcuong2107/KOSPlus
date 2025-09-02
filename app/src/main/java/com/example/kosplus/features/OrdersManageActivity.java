@@ -1,11 +1,20 @@
 package com.example.kosplus.features;
 
 import android.Manifest;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
@@ -31,9 +40,12 @@ import com.example.kosplus.MainActivity;
 import com.example.kosplus.R;
 import com.example.kosplus.adapter.OrderAdapter;
 import com.example.kosplus.databinding.ActivityOrdersManageBinding;
+import com.example.kosplus.databinding.CustomDialogLoadingBinding;
 import com.example.kosplus.datalocal.DataLocalManager;
 import com.example.kosplus.livedata.OrdersLiveData;
 import com.example.kosplus.model.Shops;
+import com.google.android.material.badge.BadgeDrawable;
+import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -42,6 +54,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class OrdersManageActivity extends AppCompatActivity {
     private CodeScanner mCodeScanner;
@@ -54,11 +67,61 @@ public class OrdersManageActivity extends AppCompatActivity {
         binding.setOrdersManage(viewModel);
         binding.executePendingBindings();
 
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        CustomDialogLoadingBinding dialogLoadingBinding = CustomDialogLoadingBinding.inflate(LayoutInflater.from(this));
+        dialog.setContentView(dialogLoadingBinding.getRoot());
+
+        Window window = dialog.getWindow();
+        window.setLayout(WindowManager.LayoutParams.MATCH_PARENT,WindowManager.LayoutParams.WRAP_CONTENT);
+        window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        WindowManager.LayoutParams win = window.getAttributes();
+        win.gravity = Gravity.CENTER;
+        window.setAttributes(win);
+        dialog.setCancelable(false);
+
+        dialog.show();
+
+// Đóng sau 3 giây
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
+        }, 3000); // 3000ms = 3 giây
+
+
+        List<String> codeList = new ArrayList<>();
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, codeList);
+        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        binding.spinner.setAdapter(arrayAdapter);
+
+
         if (DataLocalManager.getRole().equals("Customer")) {
             binding.btnScan.setVisibility(View.GONE);
             binding.scannerView.setVisibility(View.GONE);
-        }
 
+            binding.spinner.setVisibility(View.GONE);
+        } else {
+            DatabaseReference ref = FirebaseDatabase.getInstance().getReference("KOS Plus").child("Shops");
+            ref.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    codeList.clear();
+                    for (DataSnapshot dataSnapshot: snapshot.getChildren()) {
+                        Shops shop = dataSnapshot.getValue(Shops.class);
+                        if (shop != null) {
+                            codeList.add(shop.id);
+                        }
+                    }
+                    arrayAdapter.notifyDataSetChanged();
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.e("Firebase", "Lỗi tải cơ sở: " + error.getMessage());
+                }
+            });
+        }
         // Cấu hình RecyclerView
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
         binding.recyclerView.setHasFixedSize(true);
@@ -73,6 +136,17 @@ public class OrdersManageActivity extends AppCompatActivity {
                 adapter.updateData(key);
                 binding.recyclerView.setVisibility(View.VISIBLE);
                 binding.text.setVisibility(View.GONE);
+
+                Map<String, Integer> counts = orderLiveData.countAllCategories();
+
+                for (int i = 0; i < binding.tablayout.getTabCount(); i++) {
+                    String category = binding.tablayout.getTabAt(i).getText().toString(); // lấy tên gốc
+                    BadgeDrawable badge = binding.tablayout.getTabAt(i).getOrCreateBadge();
+                    badge.setBackgroundColor(ContextCompat.getColor(this, R.color.color_a));
+                    badge.setNumber(counts.get(category));
+                    badge.setVisible(true);
+                }
+
             } else {
                 binding.recyclerView.setVisibility(View.GONE);
                 binding.text.setVisibility(View.VISIBLE);
@@ -80,28 +154,30 @@ public class OrdersManageActivity extends AppCompatActivity {
             }
         });
 
-        List<String> codeList = new ArrayList<>();
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, codeList);
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        binding.spinner.setAdapter(arrayAdapter);
+        binding.tablayout.addTab(binding.tablayout.newTab().setText("Tất cả"));
+        binding.tablayout.addTab(binding.tablayout.newTab().setText("Chờ xác nhận"));
+        binding.tablayout.addTab(binding.tablayout.newTab().setText("Chờ lấy hàng"));
+        binding.tablayout.addTab(binding.tablayout.newTab().setText("Đang giao"));
+        binding.tablayout.addTab(binding.tablayout.newTab().setText("Hoàn thành"));
+        binding.tablayout.addTab(binding.tablayout.newTab().setText("Đã hủy"));
 
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("KOS Plus").child("Shops");
-        ref.addValueEventListener(new ValueEventListener() {
+        binding.tablayout.getTabAt(0).select();
+
+        binding.tablayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                codeList.clear();
-                for (DataSnapshot dataSnapshot: snapshot.getChildren()) {
-                    Shops shop = dataSnapshot.getValue(Shops.class);
-                    if (shop != null) {
-                        codeList.add(shop.id);
-                    }
-                }
-                arrayAdapter.notifyDataSetChanged();
+            public void onTabSelected(TabLayout.Tab tab) {
+                binding.searchView.setQuery("",false);
+                orderLiveData.filterByCategory(tab.getText().toString());
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e("Firebase", "Lỗi tải cơ sở: " + error.getMessage());
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
             }
         });
 
@@ -121,13 +197,13 @@ public class OrdersManageActivity extends AppCompatActivity {
         binding.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                adapter.getFilter().filter(query);
+                adapter.filter(query);
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                adapter.getFilter().filter(newText);
+                adapter.filter(newText);
                 return false;
             }
         });
@@ -173,7 +249,7 @@ public class OrdersManageActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         Intent intent = new Intent(this, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        overridePendingTransition(0,0);
         startActivity(intent);
     }
 }

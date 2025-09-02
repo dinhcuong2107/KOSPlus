@@ -1,13 +1,20 @@
 package com.example.kosplus.features;
 
 import android.Manifest;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -27,10 +34,13 @@ import com.budiyev.android.codescanner.CodeScanner;
 import com.example.kosplus.R;
 import com.example.kosplus.adapter.UserAdapter;
 import com.example.kosplus.databinding.ActivityUsersManageBinding;
+import com.example.kosplus.databinding.CustomDialogLoadingBinding;
 import com.example.kosplus.datalocal.DataLocalManager;
+import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public class UsersManageActivity extends AppCompatActivity {
         private CodeScanner mCodeScanner;
@@ -45,15 +55,25 @@ public class UsersManageActivity extends AppCompatActivity {
             binding.setUsersmanage(viewModel);
             binding.executePendingBindings();
 
-            ProgressDialog progressDialog = new ProgressDialog(this);
-            progressDialog.setMessage("Đang xử lý...");
-            progressDialog.setCancelable(false); // Không cho bấm ra ngoài để tắt
-            progressDialog.show();
+            Dialog dialog = new Dialog(this);
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            CustomDialogLoadingBinding dialogLoadingBinding = CustomDialogLoadingBinding.inflate(LayoutInflater.from(this));
+            dialog.setContentView(dialogLoadingBinding.getRoot());
+
+            Window window = dialog.getWindow();
+            window.setLayout(WindowManager.LayoutParams.MATCH_PARENT,WindowManager.LayoutParams.WRAP_CONTENT);
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            WindowManager.LayoutParams win = window.getAttributes();
+            win.gravity = Gravity.CENTER;
+            window.setAttributes(win);
+            dialog.setCancelable(false);
+
+            dialog.show();
 
 // Đóng sau 3 giây
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                if (progressDialog.isShowing()) {
-                    progressDialog.dismiss();
+                if (dialog.isShowing()) {
+                    dialog.dismiss();
                 }
             }, 3000); // 3000ms = 3 giây
 
@@ -70,13 +90,25 @@ public class UsersManageActivity extends AppCompatActivity {
                     adapter.updateData(users);
                     binding.textview.setVisibility(View.GONE);
                     binding.recyclerView.setVisibility(View.VISIBLE);
+
+                    Map<String, Integer> counts = viewModel.countAllUserCategories();
+
+                    for (int i = 0; i < binding.tablayout.getTabCount(); i++) {
+                        String category = binding.tablayout.getTabAt(i).getText().toString(); // lấy tên gốc
+                        BadgeDrawable badge = binding.tablayout.getTabAt(i).getOrCreateBadge();
+                        badge.setBackgroundColor(ContextCompat.getColor(this, R.color.color_a));
+                        badge.setNumber(counts.get(category));
+                        badge.setVisible(true);
+                    }
+
                 } else {
                     binding.recyclerView.setVisibility(View.GONE);
                     binding.textview.setVisibility(View.VISIBLE);
                     Log.e("Users Manage", "Danh sách trống!");
                 }
             });
-            binding.tablayout.addTab(binding.tablayout.newTab().setText("All"));
+
+            binding.tablayout.addTab(binding.tablayout.newTab().setText("Tất cả"));
             binding.tablayout.addTab(binding.tablayout.newTab().setText("Hoạt động"));
             binding.tablayout.addTab(binding.tablayout.newTab().setText("Khóa"));
             if (DataLocalManager.getRole().equals("Admin")) {
@@ -114,13 +146,13 @@ public class UsersManageActivity extends AppCompatActivity {
             binding.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                 @Override
                 public boolean onQueryTextSubmit(String query) {
-                    adapter.getFilter().filter(query);
+                    adapter.filter(query);
                     return false;
                 }
 
                 @Override
                 public boolean onQueryTextChange(String newText) {
-                    adapter.getFilter().filter(newText);
+                    adapter.filter(newText);
                     return false;
                 }
             });

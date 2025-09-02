@@ -152,8 +152,7 @@
                     android:layout_height="40dp"
                     android:text="Lưu"
                     android:textStyle="bold"
-                    android:textSize="21dp"
-                    android:textColor="@color/color_a"
+                    android:textColor="@color/white"
                     android:onClick="@{(view) -> profile.onProfileUpdate(view)}"
                     android:layout_marginTop="20dp"
                     android:textAllCaps="false"
@@ -163,8 +162,7 @@
                     android:layout_height="40dp"
                     android:text="Đổi mật khẩu"
                     android:textStyle="bold"
-                    android:textSize="21dp"
-                    android:textColor="@color/color_a"
+                    android:textColor="@color/white"
                     android:onClick="@{(view) -> profile.onPasswordUpdate(view)}"
                     android:layout_marginTop="10dp"
                     android:textAllCaps="false"
@@ -174,8 +172,7 @@
                     android:layout_height="40dp"
                     android:text="Đóng tài khoản"
                     android:textStyle="bold"
-                    android:textSize="21dp"
-                    android:textColor="@color/color_b"
+                    android:textColor="@color/color_title"
                     android:onClick="@{(view) -> profile.onLock(view)}"
                     android:visibility="@{profile.users.status ? View.VISIBLE : View.GONE}"
                     android:layout_marginTop="10dp"
@@ -187,15 +184,12 @@
                     android:layout_height="40dp"
                     android:text="Mở tài khoản"
                     android:textStyle="bold"
-                    android:textSize="21dp"
-                    android:textColor="@color/color_a"
+                    android:textColor="@color/white"
                     android:onClick="@{(view) -> profile.onUnLock(view)}"
                     android:visibility="@{profile.users.status ? View.GONE : View.VISIBLE}"
                     android:layout_marginTop="10dp"
                     android:textAllCaps="false"
                     android:background="@drawable/custom_background_button_agree"/>
-
-
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
