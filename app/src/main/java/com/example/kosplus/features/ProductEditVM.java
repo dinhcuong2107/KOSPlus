@@ -65,7 +65,7 @@ public class ProductEditVM extends AndroidViewModel {
     public ObservableField<Products> product = new ObservableField<>();
     public ObservableField<String> avatar = new ObservableField<>();
     public ObservableField<String> type = new ObservableField<>();
-
+    public ObservableField<String> price = new ObservableField<>();
 
     public ProductEditVM(@NonNull Application application, @NonNull ActivityResultRegistry registry) {
         super(application);
@@ -180,6 +180,7 @@ public class ProductEditVM extends AndroidViewModel {
                     product.set(products);
                     avatar.set(products.imageUrl);
                     type.set(products.type);
+                    price.set(String.valueOf(products.price));
                 } else {
                     Toast.makeText(context.getValue(), "Người dùng không tồn tại!", Toast.LENGTH_SHORT).show();
                 }
@@ -206,7 +207,7 @@ public class ProductEditVM extends AndroidViewModel {
             Toast.makeText(view.getContext(), "Vui lòng nhập danh mục sản phẩm", Toast.LENGTH_SHORT).show();
         } else if (TextUtils.isEmpty(product.get().type)) {
             Toast.makeText(view.getContext(), "Vui lòng nhập loại sản phẩm", Toast.LENGTH_SHORT).show();
-        } else if (product.get().price <= 0) {
+        } else if (Integer.parseInt(price.get()) <= 0) {
             Toast.makeText(view.getContext(), "Vui lòng nhập giá sản phẩm", Toast.LENGTH_SHORT).show();
         } else {
             completeUpdate(view);
@@ -219,7 +220,7 @@ public class ProductEditVM extends AndroidViewModel {
         progressDialog.show();
 
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("KOS Plus").child("Products").child(product.get().id);
-        Products productUpdate = new Products(product.get().id, avatar.get(), product.get().name, product.get().description, product.get().category, product.get().type, product.get().promotion, product.get().price, product.get().status);
+        Products productUpdate = new Products(product.get().id, avatar.get(), product.get().name, product.get().description, product.get().category, product.get().type, product.get().promotion, Integer.parseInt(price.get()), product.get().status);
         databaseReference.setValue(productUpdate, new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {

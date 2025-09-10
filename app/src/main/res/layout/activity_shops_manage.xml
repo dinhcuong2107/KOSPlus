@@ -18,14 +18,14 @@
             android:layout_height="wrap_content"
             android:background="?attr/colorPrimary"
             android:elevation="4dp"
-            android:paddingTop="20dp">
+            android:paddingTop="24dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Đăng ký cửa hàng"
+                android:text="Quản lý cửa hàng"
                 android:textStyle="bold"
-                android:textSize="20sp"
+                android:textSize="18dp"
                 android:textColor="@android:color/white"
                 android:layout_gravity="center"/>
 
@@ -36,27 +36,17 @@
             android:layout_margin="10dp"
             android:orientation="vertical"
             android:gravity="center">
-            <LinearLayout
+
+            <androidx.appcompat.widget.AppCompatButton
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
-                android:orientation="horizontal"
-                android:gravity="center">
-                <androidx.appcompat.widget.SearchView
-                    android:id="@+id/searchView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/custom_background_grey_circle"
-                    android:layout_weight="1"
-                    app:queryHint="Tên cửa hàng"
-                    app:iconifiedByDefault="false"/>
-                <ImageButton
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginLeft="8dp"
-                    android:background="@drawable/custom_background_grey_circle"
-                    android:onClick="@{(view) -> shopsMamage.onDialogRegisterShop(view)}"
-                    android:src="@drawable/rounded_home_24"/>
-            </LinearLayout>
+                android:paddingLeft="8dp"
+                android:layout_marginBottom="10dp"
+                android:textAllCaps="false"
+                android:text="Đăng ký cửa hàng"
+                android:background="@drawable/custom_background_grey_circle"
+                android:onClick="@{(view) -> shopsMamage.onDialogRegisterShop(view)}"
+                android:drawableStart="@drawable/rounded_home_24"/>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView"

@@ -75,7 +75,7 @@ public class UsersManageActivity extends AppCompatActivity {
                 if (dialog.isShowing()) {
                     dialog.dismiss();
                 }
-            }, 3000); // 3000ms = 3 giây
+            }, 1000); // 1000ms = 1 giây
 
             // Cấu hình RecyclerView
             binding.recyclerView.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
@@ -84,43 +84,118 @@ public class UsersManageActivity extends AppCompatActivity {
             UserAdapter adapter = new UserAdapter(new ArrayList<>());
             binding.recyclerView.setAdapter(adapter);
 
-            // Quan sát dữ liệu từ ViewModel
-            viewModel.getUserList().observe(this, users -> {
-                if (users != null && !users.isEmpty()) {
-                    adapter.updateData(users);
-                    binding.textview.setVisibility(View.GONE);
-                    binding.recyclerView.setVisibility(View.VISIBLE);
-
-                    Map<String, Integer> counts = viewModel.countAllUserCategories();
-
-                    for (int i = 0; i < binding.tablayout.getTabCount(); i++) {
-                        String category = binding.tablayout.getTabAt(i).getText().toString(); // lấy tên gốc
-                        BadgeDrawable badge = binding.tablayout.getTabAt(i).getOrCreateBadge();
-                        badge.setBackgroundColor(ContextCompat.getColor(this, R.color.color_a));
-                        badge.setNumber(counts.get(category));
-                        badge.setVisible(true);
-                    }
-
-                } else {
+            viewModel.filteredUsers.observe(this, users -> {
+                if (users == null || users.isEmpty()) {
                     binding.recyclerView.setVisibility(View.GONE);
                     binding.textview.setVisibility(View.VISIBLE);
                     Log.e("Users Manage", "Danh sách trống!");
+                } else {
+                    adapter.updateData(users); // cập nhật RecyclerView
+                    binding.textview.setVisibility(View.GONE);
+                    binding.recyclerView.setVisibility(View.VISIBLE);
                 }
+
             });
+
 
             binding.tablayout.addTab(binding.tablayout.newTab().setText("Tất cả"));
             binding.tablayout.addTab(binding.tablayout.newTab().setText("Hoạt động"));
             binding.tablayout.addTab(binding.tablayout.newTab().setText("Khóa"));
+
             if (DataLocalManager.getRole().equals("Admin")) {
                 binding.tablayout.addTab(binding.tablayout.newTab().setText("Manager"));
                 binding.tablayout.addTab(binding.tablayout.newTab().setText("Staff"));
                 binding.tablayout.addTab(binding.tablayout.newTab().setText("Customer"));
+
+                viewModel.getCountByRole("Manager").observe(this, count -> {
+                    TabLayout.Tab tab = binding.tablayout.getTabAt(3);
+                    if (tab != null) {
+                        BadgeDrawable badge = tab.getOrCreateBadge();
+                        badge.setVisible(count > 0);
+                        badge.setNumber(count);
+                    }
+                });
+
+                viewModel.getCountByRole("Staff").observe(this, count -> {
+                    TabLayout.Tab tab = binding.tablayout.getTabAt(4);
+                    if (tab != null) {
+                        BadgeDrawable badge = tab.getOrCreateBadge();
+                        badge.setVisible(count > 0);
+                        badge.setNumber(count);
+                    }
+                });
+
+                viewModel.getCountByRole("Customer").observe(this, count -> {
+                    TabLayout.Tab tab = binding.tablayout.getTabAt(5);
+                    if (tab != null) {
+                        BadgeDrawable badge = tab.getOrCreateBadge();
+                        badge.setVisible(count > 0);
+                        badge.setNumber(count);
+                    }
+                });
+
             }
 
             if (DataLocalManager.getRole().equals("Manager")) {
                 binding.tablayout.addTab(binding.tablayout.newTab().setText("Staff"));
                 binding.tablayout.addTab(binding.tablayout.newTab().setText("Customer"));
+
+                viewModel.getCountByRole("Staff").observe(this, count -> {
+                    TabLayout.Tab tab = binding.tablayout.getTabAt(3);
+                    if (tab != null) {
+                        BadgeDrawable badge = tab.getOrCreateBadge();
+                        badge.setVisible(count > 0);
+                        badge.setNumber(count);
+                    }
+                });
+
+                viewModel.getCountByRole("Customer").observe(this, count -> {
+                    TabLayout.Tab tab = binding.tablayout.getTabAt(4);
+                    if (tab != null) {
+                        BadgeDrawable badge = tab.getOrCreateBadge();
+                        badge.setVisible(count > 0);
+                        badge.setNumber(count);
+                    }
+                });
             }
+
+            for (int i = 0; i < binding.tablayout.getTabCount(); i++) {
+                TabLayout.Tab tab = binding.tablayout.getTabAt(i);
+                if (tab != null) {
+                    BadgeDrawable badge = tab.getOrCreateBadge();
+                    badge.setVisible(true);
+                    badge.setBackgroundColor(ContextCompat.getColor(this, R.color.color_a)); // màu badge
+                    badge.setBadgeTextColor(Color.WHITE); // màu text
+                    badge.setNumber(0); // mặc định
+                }
+            }
+
+            viewModel.getCountAll().observe(this, count -> {
+                TabLayout.Tab tab = binding.tablayout.getTabAt(0);
+                if (tab != null) {
+                    BadgeDrawable badge = tab.getOrCreateBadge();
+                    badge.setVisible(count > 0);
+                    badge.setNumber(count);
+                }
+            });
+
+            viewModel.getCountActive().observe(this, count -> {
+                TabLayout.Tab tab = binding.tablayout.getTabAt(1);
+                if (tab != null) {
+                    BadgeDrawable badge = tab.getOrCreateBadge();
+                    badge.setVisible(count > 0);
+                    badge.setNumber(count);
+                }
+            });
+
+            viewModel.getCountBlocked().observe(this, count -> {
+                TabLayout.Tab tab = binding.tablayout.getTabAt(2);
+                if (tab != null) {
+                    BadgeDrawable badge = tab.getOrCreateBadge();
+                    badge.setVisible(count > 0);
+                    badge.setNumber(count);
+                }
+            });
 
             binding.tablayout.getTabAt(0).select();
 
@@ -128,7 +203,7 @@ public class UsersManageActivity extends AppCompatActivity {
                 @Override
                 public void onTabSelected(TabLayout.Tab tab) {
                     binding.searchView.setQuery("",false);
-                    viewModel.filterByCategory(tab.getText().toString());
+                    viewModel.setCategory(tab.getText().toString());
                 }
 
                 @Override

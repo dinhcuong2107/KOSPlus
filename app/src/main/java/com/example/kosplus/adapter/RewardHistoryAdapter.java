@@ -44,7 +44,7 @@ public class RewardHistoryAdapter extends RecyclerView.Adapter<RewardHistoryAdap
         RewardHistory history = list.get(position);
         holder.binding.textviewTime.setText(history.time);
         holder.binding.textviewReward.setText(history.reward);
-        if (history.usageTime != null) {
+        if (history.usageTime != null && !history.usageTime.isEmpty()) {
             holder.binding.textviewUsageTime.setText("Đã nhận quà vào " + history.usageTime);
         } else {
             holder.binding.textviewUsageTime.setVisibility(View.GONE);

@@ -35,7 +35,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:layout_margin="10dp"
-                android:background="@drawable/custom_background_grey_circle"
                 android:orientation="horizontal"
                 android:gravity="center">
                 <androidx.appcompat.widget.SearchView
@@ -43,13 +42,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:background="@drawable/custom_background_grey_circle"
                     app:queryHint="Mã đơn hàng"
                     app:iconifiedByDefault="false"/>
                 <ImageButton
                     android:id="@+id/btnScan"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:background="#00FFFFFF"
+                    android:layout_marginLeft="8dp"
+                    android:background="@drawable/custom_background_grey_circle"
                     android:src="@drawable/rounded_qr_code_24"/>
             </LinearLayout>
 
@@ -69,7 +70,8 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent" />
+
             <TextView
                 android:id="@+id/text"
                 android:layout_width="match_parent"

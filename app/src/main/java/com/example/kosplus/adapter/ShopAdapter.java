@@ -215,7 +215,8 @@ public class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.ShopViewHolder
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         binding.spinner.setAdapter(adapter);
 
-        binding.spinner.setSelection(bankNames.indexOf(shop.bankName));
+        Log.d("BANK_SELECTED", "Tên: " + ob_bankName.get() + " - Mã: " + ob_bankCode.get());
+        binding.spinner.setSelection(bankNames.indexOf(ob_bankName.get()));
 
         binding.spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -249,7 +250,7 @@ public class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.ShopViewHolder
                         setValue(new Shops(
                                 shop.id,
                                 binding.address.getText().toString(),
-                                binding.hotline.getText().toString(), ob_bankName.get(), ob_bankCode.get(), binding.bank.getText().toString(),binding.radioOpen.isChecked()), new DatabaseReference.CompletionListener() {
+                                binding.hotline.getText().toString(), ob_bankCode.get(), ob_bankName.get(),  binding.bank.getText().toString(),binding.radioOpen.isChecked()), new DatabaseReference.CompletionListener() {
                             @Override
                             public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
 

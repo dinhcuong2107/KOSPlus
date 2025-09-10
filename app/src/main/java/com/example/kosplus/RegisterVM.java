@@ -70,7 +70,7 @@ public class RegisterVM extends AndroidViewModel {
     public ObservableField<String> name = new ObservableField<>();
     public ObservableField<String> dob = new ObservableField<>();
     public ObservableField<String> sex = new ObservableField<>();
-    public ObservableField<String> timeactivity = new ObservableField<>();
+    public ObservableField<Long> timeactivity = new ObservableField<>();
     public ObservableField<String> phone = new ObservableField<>();
     public ObservableField<String> password = new ObservableField<>();
     public ObservableField<String> passwordagain = new ObservableField<>();
@@ -224,7 +224,7 @@ public class RegisterVM extends AndroidViewModel {
                         .format(new Date(internetTime));
                 Log.d("REAL_TIME", "Thời gian Internet: " + timeString);
 
-                timeactivity.set(timeString);
+                timeactivity.set(internetTime);
             }
         }).start();
 

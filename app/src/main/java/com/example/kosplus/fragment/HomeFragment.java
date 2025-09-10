@@ -7,19 +7,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.viewpager2.widget.CompositePageTransformer;
 import androidx.viewpager2.widget.MarginPageTransformer;
@@ -27,19 +21,22 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.kosplus.R;
 import com.example.kosplus.adapter.BannerAdapter;
-import com.example.kosplus.adapter.ProductAdapter;
 import com.example.kosplus.adapter.ProductVerticalAdapter;
 import com.example.kosplus.databinding.ActivityHomeFragmentBinding;
-import com.example.kosplus.func.OneSignalNotification;
 import com.example.kosplus.livedata.BannerLiveData;
-import com.example.kosplus.livedata.ProductsOnSaleLiveData;
-import com.example.kosplus.livedata.ProductsSuggestionLiveData;
-import com.example.kosplus.livedata.ProductsTopRevenueLiveData;
-import com.example.kosplus.livedata.ProductsTopWeeklyRevenueLiveData;
+import com.example.kosplus.livedata.ProductsLiveData;
 import com.example.kosplus.model.Banners;
+import com.example.kosplus.model.ProductSales;
+import com.example.kosplus.model.Products;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.onesignal.OneSignal;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class HomeFragment extends Fragment {
@@ -118,59 +115,73 @@ public class HomeFragment extends Fragment {
             }
         });
 
+        ProductsLiveData liveData = ViewModelProviders.of(this).get(ProductsLiveData.class);
+
         // Cấu hình RecyclerView
         binding.recyclerViewSuggestion.setLayoutManager(new LinearLayoutManager(this.getContext(), LinearLayoutManager.VERTICAL, false));
         binding.recyclerViewSuggestion.setHasFixedSize(true);
-        ProductVerticalAdapter productAdapterSuggestion = new ProductVerticalAdapter(new ArrayList<>());
+        ProductVerticalAdapter productAdapterSuggestion = new ProductVerticalAdapter(new ArrayList<>(), false);
         binding.recyclerViewSuggestion.setAdapter(productAdapterSuggestion);
 
         // Quan sát dữ liệu từ LiveData
-        ProductsSuggestionLiveData suggestionLiveData = ViewModelProviders.of(this).get(ProductsSuggestionLiveData.class);
-        suggestionLiveData.getLiveData().observe(this.getViewLifecycleOwner(), key -> {
+        liveData.getRandomProducts().observe(this.getViewLifecycleOwner(), key -> {
             if (key != null && !key.isEmpty()) {
-                productAdapterSuggestion.updateData(key);
+                productAdapterSuggestion.updateData(key, false);
+            } else {
+                binding.layoutSuggestion.setVisibility(View.GONE);
             }
         });
 
         // Cấu hình RecyclerView
         binding.recyclerViewOnSale.setLayoutManager(new LinearLayoutManager(this.getContext(), LinearLayoutManager.VERTICAL, false));
         binding.recyclerViewOnSale.setHasFixedSize(true);
-        ProductVerticalAdapter productAdapterOnSale = new ProductVerticalAdapter(new ArrayList<>());
+        ProductVerticalAdapter productAdapterOnSale = new ProductVerticalAdapter(new ArrayList<>(),false);
         binding.recyclerViewOnSale.setAdapter(productAdapterOnSale);
 
         // Quan sát dữ liệu từ LiveData
-        ProductsOnSaleLiveData onSaleLiveData = ViewModelProviders.of(this).get(ProductsOnSaleLiveData.class);
-        onSaleLiveData.getLiveData().observe(this.getViewLifecycleOwner(), key -> {
+        liveData.getActivePromotions().observe(this.getViewLifecycleOwner(), key -> {
             if (key != null && !key.isEmpty()) {
-                productAdapterOnSale.updateData(key);
+                productAdapterOnSale.updateData(key, false);
+            } else {
+                binding.layoutOnSale.setVisibility(View.GONE);
             }
         });
 
         // Cấu hình RecyclerView
         binding.recyclerViewTopWeekly.setLayoutManager(new LinearLayoutManager(this.getContext(), LinearLayoutManager.VERTICAL, false));
         binding.recyclerViewTopWeekly.setHasFixedSize(true);
-        ProductVerticalAdapter productAdapterWeekly = new ProductVerticalAdapter(new ArrayList<>());
+        ProductVerticalAdapter productAdapterWeekly = new ProductVerticalAdapter(new ArrayList<>(),true);
         binding.recyclerViewTopWeekly.setAdapter(productAdapterWeekly);
 
-        // Quan sát dữ liệu từ LiveData
-        ProductsTopWeeklyRevenueLiveData topWeeklyRevenueLiveData = ViewModelProviders.of(this).get(ProductsTopWeeklyRevenueLiveData.class);
-        topWeeklyRevenueLiveData.getLiveData().observe(this.getViewLifecycleOwner(), key -> {
+        // Thời gian hiện tại
+        long now = System.currentTimeMillis();
+
+        // 7 ngày trước
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(now);
+        calendar.add(Calendar.DAY_OF_YEAR, -7);
+        long sevenDaysAgo = calendar.getTimeInMillis();
+
+        liveData.getTop10BestSellingProductsOfTime(sevenDaysAgo, now).observe(this.getViewLifecycleOwner(), key -> {
             if (key != null && !key.isEmpty()) {
-                productAdapterWeekly.updateData(key);
+                productAdapterWeekly.updateData(key, true);
+            } else {
+                binding.layoutTopWeekly.setVisibility(View.GONE);
             }
         });
 
         // Cấu hình RecyclerView
         binding.recyclerViewTop.setLayoutManager(new LinearLayoutManager(this.getContext(), LinearLayoutManager.VERTICAL, false));
         binding.recyclerViewTop.setHasFixedSize(true);
-        ProductVerticalAdapter productAdapter = new ProductVerticalAdapter(new ArrayList<>());
+        ProductVerticalAdapter productAdapter = new ProductVerticalAdapter(new ArrayList<>(), true);
         binding.recyclerViewTop.setAdapter(productAdapter);
 
-        // Quan sát dữ liệu từ LiveData
-        ProductsTopRevenueLiveData top10LiveData = ViewModelProviders.of(this).get(ProductsTopRevenueLiveData.class);
-        top10LiveData.getLiveData().observe(this.getViewLifecycleOwner(), key -> {
-            if (key != null && !key.isEmpty()) {
-                productAdapter.updateData(key);
+        liveData.getTopProducts().observe(this.getViewLifecycleOwner(), list -> {
+            if (list != null && !list.isEmpty()) {
+                productAdapter.updateData(list, true);
+            } else {
+                binding.layoutTop.setVisibility(View.GONE);
+                Log.d("TOP_PRODUCT", "Không có dữ liệu");
             }
         });
 

@@ -30,6 +30,8 @@ import com.example.kosplus.databinding.ActivityMainBinding;
 import com.example.kosplus.func.DepthPageTransformer;
 import com.example.kosplus.livedata.NotificationsLiveData;
 import com.example.kosplus.model.Notifications;
+import com.example.kosplus.model.NotificationsRepository;
+import com.example.kosplus.model.OrdersRepository;
 import com.google.android.material.badge.BadgeDrawable;
 import com.onesignal.OneSignal;
 
@@ -83,25 +85,18 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
+        NotificationsRepository notificationsRepository = new NotificationsRepository(this.getApplication());
+        notificationsRepository.preloadNotifications();
+
 // Gắn badge vào mục "Thông báo" (R.id.notifications)
         BadgeDrawable badge = binding.bottomnavigation.getOrCreateBadge(R.id.item_notifications);
         badge.setVisible(true);  // Hiển thị badge
 
         NotificationsLiveData liveData = ViewModelProviders.of(this).get(NotificationsLiveData.class);
-        liveData.getLiveData().observe(this, new Observer<List<Notifications>>() {
-            @Override
-            public void onChanged(List<Notifications> notifications) {
-                int i = 0;
-                for (Notifications notification : notifications) {
-
-                    if (notification.status) {
-                        i++;
-                    }
-                }
-                badge.setNumber(i);      // Gán số hiển thị (ví dụ: 5 thông báo)
-            }
+        liveData.getCountNotifications().observe(this, count -> {
+            badge.setNumber(count);
         });
-
+        
 // Tuỳ chỉnh màu sắc
         badge.setBackgroundColor(ContextCompat.getColor(this, R.color.color_a));
         badge.setBadgeTextColor(ContextCompat.getColor(this, R.color.white));

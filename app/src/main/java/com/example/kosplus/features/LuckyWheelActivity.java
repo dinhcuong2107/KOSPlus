@@ -63,7 +63,7 @@ public class LuckyWheelActivity extends AppCompatActivity {
             } else {
                 Log.d("Scan result", result.getText());
                 mCodeScanner.stopPreview();
-                viewModel.saveUsageTimeReward(binding.getRoot(), result.getText());
+                viewModel.checkQR(binding.getRoot(), result.getText());
                 binding.scannerView.setVisibility(View.GONE);
             }
         }));
@@ -162,14 +162,20 @@ public class LuckyWheelActivity extends AppCompatActivity {
         });
 
         binding.spin.setOnClickListener(v -> {
-
-            if (viewModel.quantityTicket.get() > 0 ) {
+            if (DataLocalManager.getRole().equals("Customer")) {
+                if (viewModel.quantityTicket.get() > 0 ) {
+                    targetIndex = getWeightedIndex(list);
+                    Log.d("LuckyWheel", "Selected index: " + targetIndex + " - " + list.get(targetIndex).reward);
+                    binding.luckyWheel.rotateWheelTo(targetIndex + 1);
+                } else {
+                    Toast.makeText(this, "Bạn không có vé!", Toast.LENGTH_SHORT).show();
+                }
+            } else {
                 targetIndex = getWeightedIndex(list);
                 Log.d("LuckyWheel", "Selected index: " + targetIndex + " - " + list.get(targetIndex).reward);
                 binding.luckyWheel.rotateWheelTo(targetIndex + 1);
-            } else {
-                Toast.makeText(this, "Bạn không có vé!", Toast.LENGTH_SHORT).show();
             }
+
         });
 
         binding.btnScan.setOnClickListener(v -> {
@@ -179,6 +185,7 @@ public class LuckyWheelActivity extends AppCompatActivity {
             } else {
                 binding.scannerView.setVisibility(View.VISIBLE);
                 mCodeScanner.startPreview(); // Bắt đầu quét
+                Log.d("LuckyWheel", "scanning...");
             }
         });
 
@@ -189,9 +196,7 @@ public class LuckyWheelActivity extends AppCompatActivity {
             // TODO: Firebase
             viewModel.saveRewardToFirebase(reward);
         });
-
     }
-
     private int getWeightedIndex(List<LuckyRewards> list) {
         int totalWeight = 0;
 

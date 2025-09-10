@@ -82,19 +82,18 @@ public class OrdersManageActivity extends AppCompatActivity {
 
         dialog.show();
 
-// Đóng sau 3 giây
+// Đóng sau 1 giây
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             if (dialog.isShowing()) {
                 dialog.dismiss();
             }
-        }, 3000); // 3000ms = 3 giây
+        }, 1000); // 1000ms = 1 giây
 
 
         List<String> codeList = new ArrayList<>();
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, codeList);
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         binding.spinner.setAdapter(arrayAdapter);
-
 
         if (DataLocalManager.getRole().equals("Customer")) {
             binding.btnScan.setVisibility(View.GONE);
@@ -122,6 +121,7 @@ public class OrdersManageActivity extends AppCompatActivity {
                 }
             });
         }
+
         // Cấu hình RecyclerView
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
         binding.recyclerView.setHasFixedSize(true);
@@ -131,22 +131,11 @@ public class OrdersManageActivity extends AppCompatActivity {
 
         // Quan sát dữ liệu từ LiveData
         OrdersLiveData orderLiveData = ViewModelProviders.of(this).get(OrdersLiveData.class);
-        orderLiveData.getLiveData().observe(this, key -> {
+        orderLiveData.getFilteredOrders().observe(this, key -> {
             if (key != null && !key.isEmpty()) {
                 adapter.updateData(key);
                 binding.recyclerView.setVisibility(View.VISIBLE);
                 binding.text.setVisibility(View.GONE);
-
-                Map<String, Integer> counts = orderLiveData.countAllCategories();
-
-                for (int i = 0; i < binding.tablayout.getTabCount(); i++) {
-                    String category = binding.tablayout.getTabAt(i).getText().toString(); // lấy tên gốc
-                    BadgeDrawable badge = binding.tablayout.getTabAt(i).getOrCreateBadge();
-                    badge.setBackgroundColor(ContextCompat.getColor(this, R.color.color_a));
-                    badge.setNumber(counts.get(category));
-                    badge.setVisible(true);
-                }
-
             } else {
                 binding.recyclerView.setVisibility(View.GONE);
                 binding.text.setVisibility(View.VISIBLE);
@@ -155,8 +144,8 @@ public class OrdersManageActivity extends AppCompatActivity {
         });
 
         binding.tablayout.addTab(binding.tablayout.newTab().setText("Tất cả"));
-        binding.tablayout.addTab(binding.tablayout.newTab().setText("Chờ xác nhận"));
-        binding.tablayout.addTab(binding.tablayout.newTab().setText("Chờ lấy hàng"));
+        binding.tablayout.addTab(binding.tablayout.newTab().setText("Chưa xác nhận"));
+        binding.tablayout.addTab(binding.tablayout.newTab().setText("Đã xác nhận"));
         binding.tablayout.addTab(binding.tablayout.newTab().setText("Đang giao"));
         binding.tablayout.addTab(binding.tablayout.newTab().setText("Hoàn thành"));
         binding.tablayout.addTab(binding.tablayout.newTab().setText("Đã hủy"));
@@ -167,7 +156,7 @@ public class OrdersManageActivity extends AppCompatActivity {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 binding.searchView.setQuery("",false);
-                orderLiveData.filterByCategory(tab.getText().toString());
+                orderLiveData.setCategory(tab.getText().toString());
             }
 
             @Override
@@ -181,12 +170,28 @@ public class OrdersManageActivity extends AppCompatActivity {
             }
         });
 
+        // Set Badge Defaut
+        loadBadge(binding, orderLiveData);
+        
+        for (int i = 0; i < binding.tablayout.getTabCount(); i++) {
+            TabLayout.Tab tab = binding.tablayout.getTabAt(i);
+            if (tab != null) {
+                BadgeDrawable badge = tab.getOrCreateBadge();
+                badge.setVisible(true);
+                badge.setBackgroundColor(ContextCompat.getColor(this, R.color.color_a)); // màu badge
+                badge.setBadgeTextColor(Color.WHITE); // màu text
+                badge.setNumber(0); // mặc định
+            }
+        }
+
         binding.spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selectedCode = codeList.get(position);
                 Log.d("CODE_SELECTED", "Mã: " + selectedCode);
                 orderLiveData.setCode(selectedCode);
+
+                loadBadge(binding, orderLiveData);
             }
 
             @Override
@@ -234,6 +239,58 @@ public class OrdersManageActivity extends AppCompatActivity {
             }
         });
     }
+
+    private void loadBadge(ActivityOrdersManageBinding binding, OrdersLiveData orderLiveData) {
+        orderLiveData.getCountOrdersAll().observe(OrdersManageActivity.this, count -> {
+            TabLayout.Tab tab = binding.tablayout.getTabAt(0);
+            if (tab != null) {
+                BadgeDrawable badge = tab.getOrCreateBadge();
+                badge.setVisible(count > 0);
+                badge.setNumber(count);
+            }
+        });
+        orderLiveData.getCountOrdersCreated().observe(this, count -> {
+            TabLayout.Tab tab = binding.tablayout.getTabAt(1);
+            if (tab != null) {
+                BadgeDrawable badge = tab.getOrCreateBadge();
+                badge.setVisible(count > 0);
+                badge.setNumber(count);
+            }
+        });
+        orderLiveData.getCountOrdersConfirmed().observe(this, count -> {
+            TabLayout.Tab tab = binding.tablayout.getTabAt(2);
+            if (tab != null) {
+                BadgeDrawable badge = tab.getOrCreateBadge();
+                badge.setVisible(count > 0);
+                badge.setNumber(count);
+            }
+        });
+        orderLiveData.getCountOrdersDelivery().observe(this, count -> {
+            TabLayout.Tab tab = binding.tablayout.getTabAt(3);
+            if (tab != null) {
+                BadgeDrawable badge = tab.getOrCreateBadge();
+                badge.setVisible(count > 0);
+                badge.setNumber(count);
+            }
+        });
+        orderLiveData.getCountOrdersCompleted().observe(this, count -> {
+            TabLayout.Tab tab = binding.tablayout.getTabAt(4);
+            if (tab != null) {
+                BadgeDrawable badge = tab.getOrCreateBadge();
+                badge.setVisible(count > 0);
+                badge.setNumber(count);
+            }
+        });
+        orderLiveData.getCountOrdersCanceled().observe(this, count -> {
+            TabLayout.Tab tab = binding.tablayout.getTabAt(5);
+            if (tab != null) {
+                BadgeDrawable badge = tab.getOrCreateBadge();
+                badge.setVisible(count > 0);
+                badge.setNumber(count);
+            }
+        });
+    }
+
     @Override
     protected void onResume() {
         super.onResume();

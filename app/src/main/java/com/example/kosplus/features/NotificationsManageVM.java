@@ -189,7 +189,9 @@ public class NotificationsManageVM extends AndroidViewModel {
             // Lấy thời gian mạng
             new Thread(() -> {
                 long internetTime = Utils.getInternetTimeMillis();
-                if (internetTime <= 0) return;
+                if (internetTime <= 0) {
+                    Toast.makeText(view.getContext(), "Lỗi mạng", Toast.LENGTH_LONG).show();
+                    return;}
 
                 String timeString = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy", Locale.getDefault())
                         .format(new Date(internetTime));
@@ -202,10 +204,10 @@ public class NotificationsManageVM extends AndroidViewModel {
                             } else {
                                 if (imgUrl.get() != null && !imgUrl.get().equals(""))
                                 {
-                                    Utils.pushNotification(imgUrl.get(), binding.title.getText().toString(), binding.description.getText().toString(), "All", timeString);
+                                    Utils.pushNotification(imgUrl.get(), binding.title.getText().toString(), binding.description.getText().toString(), "All", internetTime);
                                     OneSignalNotification.sendNotificationToAllUsers(binding.title.getText().toString(), binding.description.getText().toString());
                                 } else {
-                                    Utils.pushNotification(imgUrl.get(), binding.title.getText().toString(), binding.description.getText().toString(), "All", timeString);
+                                    Utils.pushNotification(imgUrl.get(), binding.title.getText().toString(), binding.description.getText().toString(), "All", internetTime);
                                     OneSignalNotification.sendNotificationToAllUsers(binding.title.getText().toString(), binding.description.getText().toString());
                                 }
                                 dialog.dismiss();

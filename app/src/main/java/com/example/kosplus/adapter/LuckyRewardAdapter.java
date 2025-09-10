@@ -41,7 +41,7 @@ public class LuckyRewardAdapter extends RecyclerView.Adapter<LuckyRewardAdapter.
         holder.binding.point.setText(String.valueOf(luckyReward.point));
 
         holder.binding.delete.setOnClickListener(v -> {
-            Utils.showVerificationDialog(v.getContext(), "Bạn có muốn xóa phần thưởng này không?", "Bạn có muốn xóa phần thưởng này không?",""+luckyReward.reward, ()->{
+            Utils.showVerificationDialog(v.getContext(), "Verification", "Bạn có muốn xóa phần thưởng này không?",""+luckyReward.reward, ()->{
                 DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("KOS Plus").child("LuckyRewards").child(luckyReward.id);
                 databaseReference.removeValue();
             });

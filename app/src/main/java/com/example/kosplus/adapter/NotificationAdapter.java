@@ -1,6 +1,8 @@
 package com.example.kosplus.adapter;
 
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -8,6 +10,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.kosplus.R;
 import com.example.kosplus.databinding.ItemNotificationBinding;
 import com.example.kosplus.datalocal.DataLocalManager;
 import com.example.kosplus.func.Utils;
@@ -16,7 +19,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.List;
-
 public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.NotificationViewHolder> {
     List<Notifications> list;
     public NotificationAdapter(List<Notifications> list) {
@@ -41,16 +43,25 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         Notifications notification = list.get(position);
         holder.binding.title.setText(notification.title);
         holder.binding.content.setText(notification.content);
-        holder.binding.time.setText(notification.time);
-
-        if (!notification.status) {
-            holder.binding.layout.setBackgroundColor(Color.parseColor("#FFFFFF"));
-        } else {
-            holder.binding.layout.setBackgroundColor(Color.parseColor("#ebfffe"));
-        }
+        holder.binding.time.setText(Utils.longToTimeString(notification.time));
 
         if (notification.userId.equals("All")) {
-            holder.binding.layout.setBackgroundColor(Color.parseColor("#b8fffc"));
+            GradientDrawable drawable = new GradientDrawable();
+            drawable.setShape(GradientDrawable.RECTANGLE);
+            drawable.setCornerRadius(24);
+            drawable.setColor(Color.parseColor("#ffdcbf"));
+            holder.binding.layout.setBackground(drawable);
+        } else {
+            if (!notification.status) {
+                holder.binding.layout.setBackgroundColor(Color.parseColor("#FFFFFF"));
+            } else {
+                GradientDrawable drawable = new GradientDrawable();
+                drawable.setShape(GradientDrawable.RECTANGLE);
+                drawable.setCornerRadius(24);
+                drawable.setColor(Color.parseColor("#ffebdb"));
+                holder.binding.layout.setBackground(drawable);
+                //   holder.binding.layout.setBackgroundColor(Color.parseColor("#ebfffe"));
+            }
         }
 
         holder.binding.imageView.setOnClickListener(view -> {

@@ -6,6 +6,8 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,6 +34,8 @@ public class LoginVM extends ViewModel {
     public ObservableField<String> phone = new ObservableField<>();
     public ObservableField<String> name = new ObservableField<>();
     public ObservableField<String> password = new ObservableField<>();
+
+    public ObservableField<String> supportId = new ObservableField<>();
     public LoginVM() {
         name.set("Đăng nhập");
 
@@ -59,7 +63,47 @@ public class LoginVM extends ViewModel {
             phone.set("");
             name.set("");
         }
+
+        loadSupportId();
     }
+
+    private void loadSupportId() {
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("KOS Plus").child("Support");
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    String id = snapshot.getValue(String.class);
+                    supportId.set(id);
+                    Log.d("Messenger", "Supporter Đã sẵn sàng");
+                } else {
+                    supportId.set("");
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+    public void openMessenger(View view, String supportId) {
+        try {
+            Uri uri = Uri.parse("https://m.me/" + supportId);
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            intent.setPackage("com.facebook.orca"); // chỉ mở Messenger app
+            if (intent.resolveActivity(view.getContext().getPackageManager()) != null) {
+                view.getContext().startActivity(intent);
+            } else {
+                Toast.makeText(view.getContext(), "Vui lòng cài đặt Messenger", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Toast.makeText(view.getContext(), "Không thể mở Messenger", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        }
+    }
+
     public void onClickLogin(View view){
         Dialog dialog = new Dialog(view.getContext());
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -85,7 +129,6 @@ public class LoginVM extends ViewModel {
                             for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                                 Users users = dataSnapshot.getValue(Users.class);
                                 if (users != null && users.password.equals(password.get())) {
-
                                     if (users.status) {
                                         // Đăng nhập thành công
                                         dialog.dismiss();
@@ -98,8 +141,8 @@ public class LoginVM extends ViewModel {
                                     } else {
                                         dialog.dismiss();
                                         Utils.showError(view.getContext(), "Tài khoản đã bị khóa!");
+                                        return;
                                     }
-
                                 }
                             }
                             // Sai mật khẩu
@@ -119,6 +162,17 @@ public class LoginVM extends ViewModel {
                     }
                 });
 
+    }
+
+    public void onNextForgotPassword(View view){
+        Utils.showNotificationDialog(view.getContext(),"","Quên mật khẩu","Vui lòng liên hệ nhân viên hỗ trợ online bên dưới hoặc nhân viên tại quầy để lấy lại mật khẩu");
+    }
+    public void onConnectSP (View view){
+        if (supportId.get() == null || supportId.get().isEmpty()) {
+            Toast.makeText(view.getContext(), "Đang bảo trì", Toast.LENGTH_SHORT).show();
+        } else {
+            openMessenger(view, supportId.get());
+        }
     }
     public void onNextIntentMain(View view){
         Intent intent = new Intent(view.getContext(),MainActivity.class);

@@ -71,6 +71,27 @@ import java.util.regex.Pattern;
 
 public class Utils {
 
+    private static final SimpleDateFormat sdf =
+            new SimpleDateFormat("HH:mm:ss dd/MM/yyyy", Locale.getDefault());
+
+    // 1. Convert từ long -> String
+    public static String longToTimeString(long timeMillis) {
+        return sdf.format(new Date(timeMillis));
+    }
+
+    // 2. Convert từ String -> long
+    public static long timeStringToLong(String timeString) {
+        try {
+            Date date = sdf.parse(timeString);
+            if (date != null) {
+                return date.getTime();
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return 0; // nếu parse fail
+    }
+
     public static void requestPermissions (Context context)  {
         List<String> permissionList = new ArrayList<>();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -117,7 +138,7 @@ public class Utils {
             ActivityCompat.requestPermissions((android.app.Activity) context, permissionList.toArray(new String[permissionList.size()]), 100);
         }
     }
-    public static void pushNotification(String imgUrl, String title, String content, String userID, String time ) {
+    public static void pushNotification(String imgUrl, String title, String content, String userID, long time ) {
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("KOS Plus").child("Notifications");
         String UID = databaseReference.push().getKey();
 
@@ -160,32 +181,6 @@ public class Utils {
         // Nếu tất cả thất bại, dùng thời gian thiết bị
         Log.e("getInternetTimeMillis: ", "Lỗi lấy thời gian");
         return System.currentTimeMillis();
-    }
-    public static boolean checkTime(String nowStr, String startStr, String endStr) {
-
-        if (nowStr == null || startStr == null || endStr == null ||
-                nowStr.trim().isEmpty() || startStr.trim().isEmpty() || endStr.trim().isEmpty()) {
-            return false;
-        }
-
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-        try {
-            // Chuyển đổi chuỗi thành đối tượng Date
-            Date nowDate = sdf.parse(nowStr);
-            Date startDate = sdf.parse(startStr);
-            Date endDate = sdf.parse(endStr);
-
-            if (nowDate == null || startDate == null || endDate == null) {
-                Log.e( "checkTime: ", "" + nowDate + " " + startDate + " " + endDate);
-                return false; // Nếu có date nào bị null thì trả về false
-            }
-
-            // So sánh: now nằm giữa start và end (bao gồm cả hai)
-            return !nowDate.before(startDate) && !nowDate.after(endDate);
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return false;
-        }
     }
     public static void showProfileDialog(View view, Users users) {
         Dialog dialog = new Dialog(view.getContext());
@@ -331,7 +326,7 @@ public class Utils {
                                 public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
                                     OneSignalNotification.sendNotificationToUser(id, "Biến động số dư: +" + Utils.formatCurrencyVND(Long.parseLong(binding.amount.getText().toString())), "Nạp thành công. Vui lòng kiểm tra lịch sử giao dịch");
                                     dialog.dismiss();
-                                    updateWallet(context, id, "deposit", Long.parseLong(binding.amount.getText().toString()), timeString);
+                                    updateWallet(context, id, "deposit", Long.parseLong(binding.amount.getText().toString()), internetTime);
                                 }
                             });
                         });
@@ -349,7 +344,7 @@ public class Utils {
 
         dialog.show();
     };
-    public static void updateWallet(Context context, String id, String type, long amount, String time) {
+    public static void updateWallet(Context context, String id, String type, long amount, long time) {
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("KOS Plus").child("Wallets").child(id);
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

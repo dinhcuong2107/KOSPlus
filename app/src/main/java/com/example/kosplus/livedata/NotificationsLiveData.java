@@ -1,73 +1,70 @@
 package com.example.kosplus.livedata;
 
+import android.app.Application;
+
 import androidx.annotation.NonNull;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 
 import com.example.kosplus.datalocal.DataLocalManager;
 import com.example.kosplus.model.Notifications;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.example.kosplus.model.NotificationsRepository;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
+public class NotificationsLiveData extends AndroidViewModel {
 
-public class NotificationsLiveData extends ViewModel {
-    private MutableLiveData<List<Notifications>> liveData;
+    private final NotificationsRepository repository;
+    private final MediatorLiveData<List<Notifications>> liveData = new MediatorLiveData<>();
+    private final LiveData<List<Notifications>> notificationsNew;
+    private final LiveData<List<Notifications>> notificationsImportant;
 
-    public MutableLiveData<List<Notifications>> getLiveData(){
-        if (liveData == null){
-            liveData = new MutableLiveData<>();
-            loadData();
-        }
+    public NotificationsLiveData(@NonNull Application application) {
+        super(application);
+        repository = new NotificationsRepository(application);
+
+        // Tải dữ liệu lần đầu
+        repository.preloadNotifications();
+
+        // Lấy 2 luồng dữ liệu
+        notificationsImportant = repository.getAllNotifications("All", 7); // Important lên đầu
+        notificationsNew = repository.getAllNotifications(DataLocalManager.getUid(), 30); // Thông báo của user
+
+        // Gộp 2 nguồn dữ liệu, Important luôn lên đầu
+        liveData.addSource(notificationsImportant, list -> mergeLists(notificationsNew.getValue(), list));
+        liveData.addSource(notificationsNew, list -> mergeLists(list, notificationsImportant.getValue()));
+
+        // Bật realtime sync
+        repository.startRealtimeSync();
+    }
+
+    public LiveData<List<Notifications>> getLiveData() {
         return liveData;
     }
 
-    private void loadData() {
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("KOS Plus").child("Notifications");
-        databaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    List<Notifications> list = new ArrayList<>();
-                    for (DataSnapshot dataSnapshot: snapshot.getChildren()) {
-                        Notifications notification = dataSnapshot.getValue(Notifications.class);
-                        if (notification.userId.equals("All") || notification.userId.equals(DataLocalManager.getUid())) {
-                            list.add(notification);
-                        }
-                    }
-
-                    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy", Locale.getDefault());
-                    Collections.sort(list, (o1, o2) -> {
-                        try {
-                            Date d1 = sdf.parse(o1.time);
-                            Date d2 = sdf.parse(o2.time);
-                            return d2.compareTo(d1); // mới nhất trước
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                            return 0;
-                        }
-                    });
-                    liveData.setValue(list);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
+    public LiveData<Integer> getCountNotifications() {
+        return repository.getUnreadCount(DataLocalManager.getUid());
     }
 
-    public void setLiveData(MutableLiveData<List<Notifications>> liveData) {
-        this.liveData = liveData;
+    /**
+     * Gộp 2 list -> Important lên đầu, không loại bỏ trùng
+     */
+    private void mergeLists(List<Notifications> userList, List<Notifications> importantList) {
+        List<Notifications> merged = new ArrayList<>();
+
+        // Important luôn lên đầu
+        if (importantList != null) merged.addAll(importantList);
+
+        // User notifications tiếp theo
+        if (userList != null) merged.addAll(userList);
+
+        liveData.setValue(merged);
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        repository.stopRealtimeSync();
     }
 }

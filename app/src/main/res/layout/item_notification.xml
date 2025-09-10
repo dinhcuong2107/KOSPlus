@@ -12,6 +12,7 @@
     <androidx.cardview.widget.CardView
         android:layout_width="40dp"
         android:layout_height="40dp"
+        android:layout_marginLeft="4dp"
         app:cardCornerRadius="12dp"
         tools:ignore="MissingConstraints">
         <pl.droidsonroids.gif.GifImageView

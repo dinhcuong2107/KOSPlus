@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,6 +39,8 @@ public class LuckyWheelVM extends ViewModel {
     public ObservableField<String> point = new ObservableField<>();
 
     public ObservableField<Boolean> admin = new ObservableField<>();
+
+    Dialog dialog;
 
     public LuckyWheelVM() {
         if (DataLocalManager.getRole().equals("Admin")) {
@@ -98,7 +101,10 @@ public class LuckyWheelVM extends ViewModel {
         // Lấy thời gian mạng
         new Thread(() -> {
             long internetTime = Utils.getInternetTimeMillis();
-            if (internetTime <= 0) return;
+            if (internetTime <= 0) {
+                Log.e("KOS Plus", "LuckyWheelVM saveRewardToFirebase: " + internetTime);
+                return;
+            }
 
             String timeString = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy", Locale.getDefault())
                     .format(new Date(internetTime));
@@ -115,7 +121,7 @@ public class LuckyWheelVM extends ViewModel {
                 String id = ref.push().getKey();
                 RewardHistory data = new RewardHistory(id, reward, DataLocalManager.getUid(), timeString, usageTime);
                 ref.child(id).setValue(data);
-                Utils.pushNotification("", "Thông báo", "Bạn đã trúng " + reward, DataLocalManager.getUid(), timeString);
+                Utils.pushNotification("", "Thông báo", "Bạn đã trúng " + reward, DataLocalManager.getUid(), internetTime);
 
                 DatabaseReference ref2 = FirebaseDatabase.getInstance().getReference("KOS Plus").child("Ticket").child(DataLocalManager.getUid());
                 ref2.setValue(quantityTicket.get() - 1);
@@ -123,9 +129,9 @@ public class LuckyWheelVM extends ViewModel {
         }).start();
     }
 
-    public void saveUsageTimeReward(View view, String id) {
+    public void checkQR(View view, String id) {
 
-        Dialog dialog = new Dialog(view.getContext());
+        dialog = new Dialog(view.getContext());
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         CustomDialogLoadingBinding dialogLoadingBinding = CustomDialogLoadingBinding.inflate(LayoutInflater.from(view.getContext()));
         dialog.setContentView(dialogLoadingBinding.getRoot());
@@ -140,37 +146,85 @@ public class LuckyWheelVM extends ViewModel {
 
         dialog.show();
 
-        // Lấy thời gian mạng
+        Log.d("LuckyWheel", "checkQR: " + id);
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance()
+                .getReference("KOS Plus")
+                .child("RewardHistories");
+        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                boolean isExist = false;
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    if (dataSnapshot.getKey().equals(id)) {
+                        saveUsageTimeReward(view, id);
+                        isExist = true;
+                        break;
+                    }
+                }
+                if (!isExist) {
+                    dialog.dismiss();
+                    Utils.showError(view.getContext(), "Không tìm thấy thông tin quà tặng!");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+    public void saveUsageTimeReward(View view, String id) {
+
+                        // Lấy thời gian mạng
         new Thread(() -> {
             long internetTime = Utils.getInternetTimeMillis();
             if (internetTime <= 0) return;
 
             String timeString = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy", Locale.getDefault())
                     .format(new Date(internetTime));
-
             new Handler(Looper.getMainLooper()).post(() -> {
-                String usageTime = "";
-                if (!DataLocalManager.getRole().equals("Customer")) {
-                    usageTime = timeString;
-                }
-
                 DatabaseReference ref = FirebaseDatabase.getInstance()
                         .getReference("KOS Plus")
-                        .child("RewardHistories").child(id).child("usageTime");;
-                ref.setValue(usageTime, new DatabaseReference.CompletionListener() {
-                    @Override
-                    public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
-                        // Đóng sau 1 giây
-                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                            if (dialog.isShowing()) {
-                                dialog.dismiss();
-                            }
-                        }, 1000); // 1000ms = 1 giây
-                        Utils.showNotificationDialog(view.getContext(), "", "Thông báo", "Xác nhận sử dụng quà tặng thành công");
-                    }
-                });
+                        .child("RewardHistories").child(id);
 
-            });
+                ref.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            RewardHistory data = snapshot.getValue(RewardHistory.class);
+                            if (data.usageTime == null || data.usageTime.isEmpty()) {
+                                ref.child("usageTime").setValue(timeString, new DatabaseReference.CompletionListener() {
+                                    @Override
+                                    public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                                        // Đóng sau 1 giây
+                                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                                            if (dialog.isShowing()) {
+                                                dialog.dismiss();
+                                            }
+                                        }, 1000); // 1000ms = 1 giây
+                                        Utils.showNotificationDialog(view.getContext(), "", "Thông báo", "Xác nhận sử dụng quà tặng thành công!" + "\nQuà tặng: " + data.reward + "\nThời gian sử dụng: " + timeString);
+                                        return;
+
+                                    }
+                                });
+                            } else {
+                                dialog.dismiss();
+                                if (!data.usageTime.equals(timeString)) {
+                                    Utils.showNotificationDialog(view.getContext(), "", "Thông báo", "Quà tặng đã được xác nhận trước đó!" + "\nQuà tặng: " + data.reward + "\nThời gian sử dụng: " + data.usageTime);
+                                }
+                            }
+                        } else {
+                            dialog.dismiss();
+                            Utils.showError(view.getContext(), "Không tìm thấy thông tin quà tặng!");
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                    }
+
+                    });
+                });
         }).start();
     }
 }

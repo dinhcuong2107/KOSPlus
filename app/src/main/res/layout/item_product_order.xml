@@ -18,8 +18,8 @@
         android:orientation="horizontal">
         <TextView
             android:id="@+id/textquantity"
-            android:layout_width="80dp"
-            android:text="x 100.000"
+            android:layout_width="40dp"
+            android:text="x 100"
             android:layout_height="wrap_content" />
         <TextView
             android:id="@+id/textprice"

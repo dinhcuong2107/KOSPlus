@@ -60,6 +60,13 @@ public class UserRewardHistoriesLiveData extends ViewModel {
                         return 0;
                     }
                 });
+
+                // Chỉ lấy 10 phần tử đầu
+                if (list.size() > 10) {
+                    list = list.subList(0, 10);
+                }
+
+
                 liveData.setValue(list);
             }
 

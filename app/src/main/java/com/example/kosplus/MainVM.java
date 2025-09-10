@@ -1,12 +1,14 @@
 package com.example.kosplus;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.CountDownTimer;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.databinding.BindingAdapter;
 import androidx.databinding.ObservableField;
 import androidx.lifecycle.ViewModel;
@@ -14,6 +16,7 @@ import androidx.lifecycle.ViewModel;
 import com.example.kosplus.datalocal.DataLocalManager;
 import com.example.kosplus.func.OneSignalNotification;
 import com.example.kosplus.func.Utils;
+import com.example.kosplus.model.Notifications;
 import com.example.kosplus.model.Users;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -42,7 +45,6 @@ public class MainVM extends ViewModel {
                     Utils.showError(context, "Tài khoản của bạn đã bị định chỉnh\n Bạn sẽ buộc đăng xuất trong vòng 5s");
                     new CountDownTimer(5000, 1000) { // Đếm ngược từ 5 giây
                         public void onTick(long millisUntilFinished) {
-                            Toast.makeText(context, "Đăng xuất sau: " + millisUntilFinished / 1000 + "s", Toast.LENGTH_LONG).show();
                             Log.d("Countdown", "Đăng xuất sau: " + millisUntilFinished / 1000 + "s");
                         }
 

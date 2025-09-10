@@ -3,6 +3,8 @@ package com.example.kosplus.adapter;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
+import android.app.Activity;
+import android.app.Application;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Color;
@@ -25,6 +27,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.ObservableField;
+import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.kosplus.databinding.CustomDialogConnectPromotionBinding;
@@ -35,6 +40,8 @@ import com.example.kosplus.features.CartsActivity;
 import com.example.kosplus.features.ProductEditActivity;
 import com.example.kosplus.features.ProfileEditActivity;
 import com.example.kosplus.func.Utils;
+import com.example.kosplus.livedata.ItemCartsLiveData;
+import com.example.kosplus.livedata.ProductsLiveData;
 import com.example.kosplus.model.ItemCarts;
 import com.example.kosplus.model.Orders;
 import com.example.kosplus.model.Products;
@@ -56,12 +63,11 @@ import java.util.Map;
 
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder>{
     List<Products> list,list_search;
-    private Map<String, Integer> soldMap = new HashMap<>();
     private DatabaseReference ordersRef = FirebaseDatabase.getInstance().getReference("KOS Plus").child("Orders");
     public ProductAdapter(List<Products> list) {
         this.list = list;
         this.list_search = list;
-        loadSoldData();
+//        loadSoldData();
         notifyDataSetChanged();
     }
 
@@ -70,34 +76,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         this.list_search = list;
         notifyDataSetChanged();
     }
-    // 🔹 Load toàn bộ số lượng đã bán của tất cả sản phẩm
-    private void loadSoldData() {
-        ordersRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                soldMap.clear();
-                for (DataSnapshot orderSnap : snapshot.getChildren()) {
-                    Orders order = orderSnap.getValue(Orders.class);
-
-                    if (order != null && order.completedTime != null && !order.completedTime.isEmpty()) {
-
-                        // duyệt qua danh sách sản phẩm trong đơn hàng
-                        for (int i = 0; i < order.productId.size(); i++) {
-                            String productId = order.productId.get(i);
-                            int quantity = order.quantity.get(i);
-
-                            soldMap.put(productId, soldMap.getOrDefault(productId, 0) + quantity);
-                        }
-                    }
-                }
-                notifyDataSetChanged(); // 🔥 cập nhật lại danh sách sau khi load xong
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {}
-        });
-    }
-
     public void filter (String keySearch) {
         if (keySearch == null || keySearch.isEmpty()) {
             list = list_search;
@@ -130,13 +108,15 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         holder.binding.name.setText(product.name);
         holder.binding.description.setText(product.description);
 
-        // 🔹 Lấy số lượng đã bán từ Map
-        int soldQuantity = soldMap.getOrDefault(product.id, 0);
-        if (soldQuantity == 0) {
-            holder.binding.quantity.setText("New");
-        }else {
-            holder.binding.quantity.setText("Đã bán: " + soldQuantity);
-        }
+        // Quan sát dữ liệu từ LiveData
+        ProductsLiveData liveData = ViewModelProviders.of((FragmentActivity) holder.itemView.getContext()).get(ProductsLiveData.class);
+        liveData.getSoldQuantityByProduct(product.id).observe((LifecycleOwner) holder.itemView.getContext(), quantity -> {
+            if (quantity != null && quantity > 0) {
+                holder.binding.quantity.setText("Đã bán: " + quantity);
+            } else {
+                holder.binding.quantity.setText("New");
+            }
+        });
 
         if (product.promotion == null || product.promotion.isEmpty() || product.promotion.equals("")) {
             holder.binding.discount.setVisibility(GONE);
@@ -159,7 +139,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                                     if (snapshot.exists()) {
                                         Promotions promotion = snapshot.getValue(Promotions.class);
 
-                                        if (!promotion.status || !Utils.checkTime(timeString, promotion.start_date, promotion.end_date)) {
+                                        if (!promotion.status || internetTime < promotion.start_date || internetTime > promotion.end_date) {
                                             holder.binding.discount.setVisibility(View.GONE);
                                             holder.binding.finalPrice.setText(Utils.formatCurrencyVND(product.price));
                                         } else {
@@ -192,49 +172,16 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             }).start();
         }
         holder.binding.done.setOnClickListener(view -> {
-            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("KOS Plus").child("Carts");
-
-            // Lấy UID hiện tại
-            String currentUserId = DataLocalManager.getUid();
-            String currentProductId = product.id;
-
-            // Truy vấn kiểm tra trùng
-            databaseReference.orderByChild("userId").equalTo(currentUserId)
-                    .addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            boolean isDuplicate = false;
-
-                            for (DataSnapshot itemSnapshot : snapshot.getChildren()) {
-                                ItemCarts existingItem = itemSnapshot.getValue(ItemCarts.class);
-                                if (existingItem != null && currentProductId.equals(existingItem.productId)) {
-                                    isDuplicate = true;
-                                    break;
-                                }
-                            }
-
-                            if (isDuplicate) {
-                                Toast.makeText(view.getContext(), "Sản phẩm đã có trong giỏ hàng", Toast.LENGTH_SHORT).show();
-                            } else {
-                                // Không trùng, thêm mới
-                                String SID = databaseReference.push().getKey();
-                                ItemCarts itemCart = new ItemCarts(SID, currentProductId, currentUserId, true);
-
-                                databaseReference.child(SID).setValue(itemCart, (error, ref) -> {
-                                    if (error == null) {
-                                        Toast.makeText(view.getContext(), "Thêm vào giỏ hàng thành công", Toast.LENGTH_LONG).show();
-                                    } else {
-                                        Toast.makeText(view.getContext(), "Lỗi: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                            Toast.makeText(view.getContext(), "Lỗi Firebase: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    });
+            ItemCartsLiveData itemCartsLiveData = new ItemCartsLiveData(new Application());
+            itemCartsLiveData.addToCart(product.id, isSuccess ->{
+                ((Activity) view.getContext()).runOnUiThread(() -> {
+                    if (isSuccess) {
+                        Toast.makeText(view.getContext(), "Thêm vào giỏ hàng thành công", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(view.getContext(), "Sản phẩm đã có trong giỏ hàng", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            });
         });
 
         holder.binding.layout.setOnClickListener(v -> {
@@ -248,14 +195,14 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
                     // Mở dialog trong UI thread sau khi đã lấy giờ
                     new Handler(Looper.getMainLooper()).post(() -> {
-                        showDialogDetailProduct(v,product,timeString);
+                        showDialogDetailProduct(v, product, internetTime);
                     });
                 }
             }).start();
         });
     }
 
-    private void showDialogDetailProduct(View v, Products product, String timeNow) {
+    private void showDialogDetailProduct(View v, Products product, Long timeNow) {
         Dialog dialog = new Dialog(v.getContext());
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         CustomDialogProductBinding productDetailBinding = CustomDialogProductBinding.inflate(LayoutInflater.from(v.getContext()));
@@ -274,13 +221,15 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         productDetailBinding.description.setText("[ "+product.type+" ]"+ "\n" +product.description);
         productDetailBinding.category.setText(product.category);
 
-        // 🔹 Lấy số lượng đã bán từ Map
-        int soldQuantity = soldMap.getOrDefault(product.id, 0);
-        if (soldQuantity == 0) {
-            productDetailBinding.quantity.setText("New");
-        }else {
-            productDetailBinding.quantity.setText("Đã bán: " + soldQuantity);
-        }
+        // Quan sát dữ liệu từ LiveData
+        ProductsLiveData liveData = ViewModelProviders.of((FragmentActivity) v.getContext()).get(ProductsLiveData.class);
+        liveData.getSoldQuantityByProduct(product.id).observe((LifecycleOwner) v.getContext(), quantity -> {
+            if (quantity != null && quantity > 0) {
+                productDetailBinding.quantity.setText("Đã bán: " + quantity);
+            } else {
+                productDetailBinding.quantity.setText("New");
+            }
+        });
 
         if (product.status) {
             productDetailBinding.status.setText("Còn hàng");
@@ -297,17 +246,17 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             if (DataLocalManager.getRole().equals("Admin"))
             {
                 productDetailBinding.promotionconnect.setVisibility(VISIBLE);
+                productDetailBinding.promotiondisconnect.setVisibility(GONE);
             }
 
             productDetailBinding.promotion.setVisibility(GONE);
             productDetailBinding.promotionStatus.setVisibility(GONE);
             productDetailBinding.price.setVisibility(GONE);
             productDetailBinding.finalPrice.setText(Utils.formatCurrencyVND(product.price));
-            productDetailBinding.promotionconnect.setVisibility(GONE);
         } else {
-            if (DataLocalManager.getRole().equals("Admin"))
-            {
+            if (DataLocalManager.getRole().equals("Admin")) {
                 productDetailBinding.promotiondisconnect.setVisibility(VISIBLE);
+                productDetailBinding.promotionconnect.setVisibility(GONE);
             }
             DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("KOS Plus").child("Promotions").child(""+product.promotion);
             databaseReference.addValueEventListener(new ValueEventListener() {
@@ -322,15 +271,11 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                         return;
                     }
                     Promotions promotion = snapshot.getValue(Promotions.class);
-                    Log.e("checkTime: ", "Time now" + timeNow );
-                    Log.e("checkTime: ", "Time s" + promotion.start_date);
-                    Log.e("checkTime: ", "Time e" + promotion.end_date);
-                    if (promotion.status && Utils.checkTime(timeNow, promotion.start_date, promotion.end_date))
+                    if (promotion.status && timeNow >= promotion.start_date && timeNow <= promotion.end_date)
                     {
-                        Log.e("checkTime: ", "Time e" + Utils.checkTime(timeNow, promotion.start_date, promotion.end_date) );
                         if (promotion.type.equals("amount")) {
                             productDetailBinding.promotion.setText(" - " + promotion.discount + " VNĐ");
-                            productDetailBinding.promotionStatus.setText(promotion.start_date + " - " + promotion.end_date);
+                            productDetailBinding.promotionStatus.setText(Utils.longToTimeString(promotion.start_date) + " - " + Utils.longToTimeString(promotion.end_date));
 
                             productDetailBinding.price.setText(Utils.formatCurrencyVND(product.price));
                             productDetailBinding.price.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG);
@@ -338,7 +283,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                             productDetailBinding.finalPrice.setText(Utils.formatCurrencyVND(finalPrice));
                         } else {
                             productDetailBinding.promotion.setText(" - " + promotion.discount+"%");
-                            productDetailBinding.promotionStatus.setText(promotion.start_date + " - " + promotion.end_date);
+                            productDetailBinding.promotionStatus.setText(Utils.longToTimeString(promotion.start_date) + " - " + Utils.longToTimeString(promotion.end_date));
 
                             productDetailBinding.price.setText(Utils.formatCurrencyVND(product.price));
                             productDetailBinding.price.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG);
@@ -348,8 +293,16 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                         }
 
                     } else {
-                        productDetailBinding.promotion.setText("Chương trình khuyến mãi");
-                        productDetailBinding.promotionStatus.setText("Chương trình khuyến mãi đã hết hạn: " + promotion.end_date);
+                        productDetailBinding.promotion.setVisibility(GONE);
+                        if (timeNow < promotion.start_date) {
+                            productDetailBinding.promotionStatus.setText("Chương trình khuyến mãi chưa bắt đầu: " + promotion.start_date);
+                        }
+                        if (timeNow > promotion.end_date) {
+                            productDetailBinding.promotionStatus.setText("Chương trình khuyến mãi đã hết hạn: " + promotion.end_date);
+                        }
+                        if (promotion.status == false) {
+                            productDetailBinding.promotionStatus.setText("Chương trình khuyến mãi đã tạm thời bị khóa");
+                        }
 
                         productDetailBinding.price.setVisibility(GONE);
                         productDetailBinding.finalPrice.setText(Utils.formatCurrencyVND(product.price));
@@ -369,22 +322,16 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         });
         productDetailBinding.done.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("KOS Plus").child("Carts");
-                String SID = databaseReference.push().getKey();
-
-                ItemCarts itemCart = new ItemCarts(SID, product.id, DataLocalManager.getUid(), true);
-
-                databaseReference.child(SID).setValue(itemCart, new DatabaseReference.CompletionListener() {
-                    @Override
-                    public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
-                        if (error == null) {
-                            Intent intent = new Intent(v.getContext(), CartsActivity.class);
-                            v.getContext().startActivity(intent);
+            public void onClick(View view) {
+                ItemCartsLiveData itemCartsLiveData = new ItemCartsLiveData(new Application());
+                itemCartsLiveData.addToCart(product.id, isSuccess ->{
+                    ((Activity) view.getContext()).runOnUiThread(() -> {
+                        if (isSuccess) {
+                            Toast.makeText(view.getContext(), "Thêm vào giỏ hàng thành công", Toast.LENGTH_SHORT).show();
                         } else {
-                            Toast.makeText(v.getContext(), "" + error, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(view.getContext(), "Sản phẩm đã có trong giỏ hàng", Toast.LENGTH_SHORT).show();
                         }
-                    }
+                    });
                 });
             }
         });
@@ -448,8 +395,8 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                     connectPromotionBinding.percent.setChecked(true);
                     connectPromotionBinding.amount.setChecked(false);
                 }
-                connectPromotionBinding.startDate.setText(promotionList.get(positionCode).start_date);
-                connectPromotionBinding.endDate.setText(promotionList.get(positionCode).end_date);
+                connectPromotionBinding.startDate.setText(Utils.longToTimeString(promotionList.get(positionCode).start_date));
+                connectPromotionBinding.endDate.setText(Utils.longToTimeString(promotionList.get(positionCode).end_date));
             });
 
             connectPromotionBinding.done.setOnClickListener(view1 -> {
@@ -472,10 +419,11 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         });
 
         productDetailBinding.promotiondisconnect.setOnClickListener(view -> {
-            Utils.showVerificationDialog(view.getContext(), "Verification", "Bạn có muốn xóa khuyến mãi không?","Xác nhận xóa khuyến mãi "+productDetailBinding.promotion, () -> {
+            Utils.showVerificationDialog(view.getContext(), "Verification", "Bạn có muốn xóa khuyến mãi không?","Xác nhận xóa khuyến mãi ", () -> {
                 DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("KOS Plus")
                         .child("Products").child(product.id).child("promotion");
                 databaseReference.setValue("");
+                dialog.dismiss();
             });
         });
 

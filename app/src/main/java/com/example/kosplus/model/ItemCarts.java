@@ -1,19 +1,22 @@
 package com.example.kosplus.model;
 
+import androidx.annotation.NonNull;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity(tableName = "itemcarts", primaryKeys = {"productId", "userId"})
 public class ItemCarts {
-    public String id;
+    @NonNull
     public String productId;
+    @NonNull
     public String userId;
-    public boolean status;
+    public int quantity;
 
     public ItemCarts() {
-
     }
-
-    public ItemCarts(String id, String productId, String userId, boolean status) {
-        this.id = id;
+    public ItemCarts(@NonNull String userId, @NonNull String productId, int quantity) {
         this.productId = productId;
         this.userId = userId;
-        this.status = status;
+        this.quantity = quantity;
     }
 }

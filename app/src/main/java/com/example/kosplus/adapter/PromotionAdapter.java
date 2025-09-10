@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.kosplus.databinding.ItemPromotionBinding;
 import com.example.kosplus.func.Utils;
 import com.example.kosplus.model.Promotions;
+import com.example.kosplus.model.Users;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -45,7 +46,7 @@ public class PromotionAdapter extends RecyclerView.Adapter<PromotionAdapter.Prom
                 }
                 list = promotionsList;
             }
-            if (list.isEmpty()) {
+            if (list != null) {
                 notifyDataSetChanged();
             }
         }
@@ -64,8 +65,8 @@ public class PromotionAdapter extends RecyclerView.Adapter<PromotionAdapter.Prom
 
         holder.binding.code.setText(promotion.code);
         holder.binding.title.setText(promotion.title);
-        holder.binding.startDate.setText(promotion.start_date);
-        holder.binding.endDate.setText(promotion.end_date);
+        holder.binding.startDate.setText("" + Utils.longToTimeString(promotion.start_date));
+        holder.binding.endDate.setText("" + Utils.longToTimeString(promotion.end_date));
         holder.binding.statusSwitch.setChecked(promotion.status);
         if (promotion.type.equals("percent")) {
             holder.binding.discount.setText(promotion.discount + "%");

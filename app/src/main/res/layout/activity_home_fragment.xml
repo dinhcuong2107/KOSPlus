@@ -155,10 +155,12 @@
                 android:layout_height="12dp"/>
 
             <LinearLayout
+                android:id="@+id/layoutSuggestion"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/custom_background_grey"
                 android:padding="8dp"
+                android:layout_marginBottom="12dp"
                 android:orientation="vertical">
                 <TextView
                     android:layout_width="match_parent"
@@ -177,16 +179,13 @@
                     android:layout_height="match_parent" />
             </LinearLayout>
 
-
-        <Space
-            android:layout_width="wrap_content"
-            android:layout_height="12dp"/>
-
         <LinearLayout
+            android:id="@+id/layoutOnSale"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/custom_background_grey"
             android:padding="8dp"
+            android:layout_marginBottom="12dp"
             android:orientation="vertical">
             <TextView
                 android:layout_width="match_parent"
@@ -194,7 +193,7 @@
                 android:layout_marginBottom="4dp"
                 android:background="@drawable/custom_background_noborder"
                 android:gravity="center"
-                android:text="Sản phẩm đang khuến mãi"
+                android:text="Sản phẩm đang khuyến mãi"
                 android:textColor="@color/color_title"
                 android:textSize="18dp"
                 android:textStyle="bold"/>
@@ -205,15 +204,13 @@
                 android:layout_height="match_parent" />
         </LinearLayout>
 
-        <Space
-            android:layout_width="wrap_content"
-            android:layout_height="12dp"/>
-
         <LinearLayout
+            android:id="@+id/layoutTopWeekly"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/custom_background_grey"
             android:padding="8dp"
+            android:layout_marginBottom="12dp"
             android:orientation="vertical">
             <TextView
                 android:layout_width="match_parent"
@@ -221,7 +218,7 @@
                 android:layout_marginBottom="4dp"
                 android:background="@drawable/custom_background_noborder"
                 android:gravity="center"
-                android:text="Sản phẩm bán chạy nhất Tuần"
+                android:text="Sản phẩm bán chạy nhất tuần"
                 android:textColor="@color/color_title"
                 android:textSize="18dp"
                 android:textStyle="bold"/>
@@ -231,11 +228,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
         </LinearLayout>
-        <Space
-            android:layout_width="wrap_content"
-            android:layout_height="12dp"/>
-
         <LinearLayout
+            android:id="@+id/layoutTop"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/custom_background_grey"

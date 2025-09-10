@@ -3,23 +3,22 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:id="@+id/layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_margin="20dp"
         android:orientation="vertical"
         android:gravity="center"
         android:background="@drawable/custom_background_border">
-        <Space
-            android:layout_width="wrap_content"
-            android:layout_height="20dp"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
             android:padding="8dp"
             android:orientation="vertical"
             android:background="@drawable/custom_background_border">
@@ -38,26 +37,26 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="UserRole"
-                android:textSize="18dp"
+                android:textSize="14dp"
                 android:textStyle="bold" />
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:layout_margin="8dp"
             android:background="@drawable/custom_background_border"
             android:orientation="horizontal"
             android:gravity="center">
             <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp">
+                android:layout_margin="8dp">
 
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cardView"
-                    android:layout_width="160dp"
-                    android:layout_height="160dp"
-                    app:cardCornerRadius="10dp"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    app:cardCornerRadius="12dp"
                     android:layout_centerHorizontal="true"
                     app:cardElevation="4dp"
                     app:strokeWidth="2dp"
@@ -88,28 +87,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginLeft="10dp">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingVertical="5dp">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/rounded_star_24"
-                        app:tint="#FFEB3B"/>
-
-                    <TextView
-                        android:id="@+id/userPoints"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp"
-                        android:text="loyaltyPoints"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
-                </LinearLayout>
+                android:layout_marginLeft="8dp">
 
                 <!-- Số điện thoại -->
                 <LinearLayout
@@ -178,8 +156,8 @@
         </LinearLayout>
         <ImageView
             android:id="@+id/imageQR"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
+            android:layout_width="240dp"
+            android:layout_height="240dp"
             android:layout_marginBottom="10dp"/>
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/deposit"

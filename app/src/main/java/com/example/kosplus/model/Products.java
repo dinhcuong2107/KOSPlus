@@ -1,6 +1,13 @@
 package com.example.kosplus.model;
 
+import androidx.annotation.NonNull;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity(tableName = "products")
 public class Products {
+    @PrimaryKey()
+    @NonNull
     public String id;
     public String imageUrl;
     public String name;
@@ -15,7 +22,7 @@ public class Products {
     public Products() {
     }
 
-    public Products(String id, String imageUrl, String name, String description, String category, String type, String promotion, int price, boolean status) {
+    public Products(@NonNull String id, String imageUrl, String name, String description, String category, String type, String promotion, int price, boolean status) {
         this.id = id;
         this.imageUrl = imageUrl;
         this.name = name;

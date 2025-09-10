@@ -1,5 +1,6 @@
 package com.example.kosplus.adapter;
 
+import android.app.Application;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
@@ -15,7 +16,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.kosplus.databinding.ItemProductCartBinding;
 import com.example.kosplus.func.Utils;
+import com.example.kosplus.livedata.ItemCartsLiveData;
 import com.example.kosplus.model.ItemCarts;
+import com.example.kosplus.model.OrderItems;
 import com.example.kosplus.model.Products;
 import com.example.kosplus.model.Promotions;
 import com.google.firebase.database.DataSnapshot;
@@ -37,9 +40,8 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ItemProductCar
     private RecyclerView recyclerView;
 
     public interface OnCartDataChangedListener {
-        void onCartDataChanged(List<String> productIds, List<Integer> quantities, List<Integer> finalPrices);
+        void onCartDataChanged(List<OrderItems> orderItemsList);
     }
-
 
     public CartAdapter(List<ItemCarts> list, OnCartDataChangedListener listener) {
         this.list = list;
@@ -110,14 +112,14 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ItemProductCar
                                         Promotions promo = snapshot.getValue(Promotions.class);
                                         int priceToSet = p.price;
 
-                                        if (promo != null && promo.status &&
-                                                Utils.checkTime(timeString, promo.start_date, promo.end_date)) {
-                                            if ("amount".equals(promo.type)) {
-                                                priceToSet = p.price - promo.discount;
-                                            } else {
-                                                priceToSet = p.price - (p.price * promo.discount / 100);
-                                            }
-                                        }
+//                                        if (promo != null && promo.status &&
+//                                                Utils.checkTime(timeString, promo.start_date, promo.end_date)) {
+//                                            if ("amount".equals(promo.type)) {
+//                                                priceToSet = p.price - promo.discount;
+//                                            } else {
+//                                                priceToSet = p.price - (p.price * promo.discount / 100);
+//                                            }
+//                                        }
 
                                         finalPrice.set(priceToSet);
                                         holder.binding.total.setText(Utils.formatCurrencyVND(finalPrice.get()));
@@ -162,16 +164,9 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ItemProductCar
 
             } else {
                 Utils.showVerificationDialog(v.getContext(), "Verification","Xác nhận", "Xóa sản phẩm khỏi giỏ hàng?", () -> {
-                    DatabaseReference databaseRef = FirebaseDatabase.getInstance().getReference("KOS Plus").child("Carts").child(itemCart.id);
-                    databaseRef.removeValue()
-                            .addOnSuccessListener(aVoid -> {
-                                // Dữ liệu đã được xóa thành công
-                                Log.d("Firebase", "data deleted successfully!");
-                            })
-                            .addOnFailureListener(e -> {
-                                // Xảy ra lỗi khi xóa dữ liệu
-                                Log.e("Firebase", "Failed to delete data", e);
-                            });
+                    ItemCartsLiveData itemCartsLiveData = new ItemCartsLiveData(new Application());
+                    itemCartsLiveData.clearItem(itemCart.productId);
+
                     list.remove(holder.getAdapterPosition());
                     notifyItemRemoved(holder.getAdapterPosition());
                     notifyCartChanged();
@@ -197,9 +192,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ItemProductCar
     private void notifyCartChanged() {
         if (recyclerView == null || listener == null) return;
 
-        List<String> productIds = new ArrayList<>();
-        List<Integer> quantities = new ArrayList<>();
-        List<Integer> finalPrices = new ArrayList<>();
+        List<OrderItems> orderItemsList = new ArrayList<>();
 
         for (int i = 0; i < list.size(); i++) {
             ItemCarts item = list.get(i);
@@ -213,9 +206,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ItemProductCar
                         int quantity = Integer.parseInt(holder.binding.quatity.getText().toString());
                         int price = Integer.parseInt("" + Utils.parseCurrencyVND(holder.binding.total.getText().toString()));
 
-                        productIds.add(pid);
-                        quantities.add(quantity);
-                        finalPrices.add(price);
+                        orderItemsList.add(new OrderItems( ""+i, pid, quantity, price));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -223,7 +214,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ItemProductCar
             }
         }
 
-        listener.onCartDataChanged(productIds, quantities, finalPrices);
+        listener.onCartDataChanged(orderItemsList);
     }
 
     @Override

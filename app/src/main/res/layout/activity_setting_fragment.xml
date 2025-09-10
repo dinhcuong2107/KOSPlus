@@ -261,7 +261,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:visibility="@{settingFragment.users.role.equals(`Admin`) || settingFragment.users.role.equals(`Manager`) ? View.VISIBLE : View.GONE}"
+                    android:visibility="@{settingFragment.users.role.equals(`Admin`) ? View.VISIBLE : View.GONE}"
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center_vertical"

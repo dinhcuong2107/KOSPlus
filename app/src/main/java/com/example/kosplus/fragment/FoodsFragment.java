@@ -27,6 +27,7 @@ import com.example.kosplus.R;
 import com.example.kosplus.adapter.ProductAdapter;
 import com.example.kosplus.databinding.ActivityFoodsFragmentBinding;
 import com.example.kosplus.livedata.FoodsLiveData;
+import com.example.kosplus.livedata.ProductsLiveData;
 
 import java.util.ArrayList;
 
@@ -48,8 +49,8 @@ public class FoodsFragment extends Fragment {
         binding.recyclerView.setAdapter(adapter);
 
         // Quan sát dữ liệu từ LiveData
-        FoodsLiveData foodLiveData = ViewModelProviders.of(this).get(FoodsLiveData.class);
-        foodLiveData.getLiveData().observe(this.getViewLifecycleOwner(), key -> {
+        ProductsLiveData liveData = ViewModelProviders.of(this).get(ProductsLiveData.class);
+        liveData.getLiveDataFood().observe(this.getViewLifecycleOwner(), key -> {
             if (key != null && !key.isEmpty()) {
                 adapter.updateData(key);
                 binding.recyclerView.setVisibility(View.VISIBLE);

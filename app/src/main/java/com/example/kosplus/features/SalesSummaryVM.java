@@ -8,6 +8,7 @@ import androidx.databinding.ObservableField;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.ViewModel;
 
+import com.example.kosplus.func.Utils;
 import com.example.kosplus.model.Orders;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -72,31 +73,26 @@ public class SalesSummaryVM extends AndroidViewModel {
 
         for (Orders order : orders) {
             try {
-                Date completedDate = sdf.parse(order.completedTime);
+                Date completedDate = sdf.parse(Utils.longToTimeString(order.completedTime));
                 Calendar orderCal = Calendar.getInstance();
                 orderCal.setTime(completedDate);
 
                 int revenue = order.total;
-                int quantity = 0;
-                for (int q : order.quantity) quantity += q;
 
                 // Hôm nay
                 if (isSameDay(orderCal, now)) {
                     todayRevenue += revenue;
-                    todayQty += quantity;
                 }
 
                 // Tuần này
                 if (isSameWeek(orderCal, now)) {
                     weekRevenue += revenue;
-                    weekQty += quantity;
                 }
 
                 // Tháng này
                 if (orderCal.get(Calendar.MONTH) == now.get(Calendar.MONTH)
                         && orderCal.get(Calendar.YEAR) == now.get(Calendar.YEAR)) {
                     monthRevenue += revenue;
-                    monthQty += quantity;
                 }
 
             } catch (Exception e) {
@@ -104,9 +100,9 @@ public class SalesSummaryVM extends AndroidViewModel {
             }
         }
 
-        todaySummary.set("Hôm nay: " + todayQty + " sản phẩm, " + formatMoney(todayRevenue));
-        weekSummary.set("Tuần này: " + weekQty + " sản phẩm, " + formatMoney(weekRevenue));
-        monthSummary.set("Tháng này: " + monthQty + " sản phẩm, " + formatMoney(monthRevenue));
+        todaySummary.set("Hôm nay: " + formatMoney(todayRevenue));
+        weekSummary.set("Tuần này: " + formatMoney(weekRevenue));
+        monthSummary.set("Tháng này: " + formatMoney(monthRevenue));
     }
 
     private boolean isSameDay(Calendar c1, Calendar c2) {
@@ -134,10 +130,10 @@ public class SalesSummaryVM extends AndroidViewModel {
 
                 for (DataSnapshot child : snapshot.getChildren()) {
                     Orders order = child.getValue(Orders.class);
-                    if (order == null || order.completedTime == null || !order.status) continue;
+                    if (order == null || order.completedTime == 0 || !order.status) continue;
 
                     try {
-                        Date date = sdf.parse(order.completedTime);
+                        Date date = sdf.parse(Utils.longToTimeString(order.completedTime));
                         Calendar cal = Calendar.getInstance();
                         cal.setTime(date);
 
@@ -167,10 +163,10 @@ public class SalesSummaryVM extends AndroidViewModel {
 
                 for (DataSnapshot child : snapshot.getChildren()) {
                     Orders order = child.getValue(Orders.class);
-                    if (order == null || order.completedTime == null || !order.status) continue;
+                    if (order == null || order.completedTime == 0 || !order.status) continue;
 
                     try {
-                        Date date = sdf.parse(order.completedTime);
+                        Date date = sdf.parse(Utils.longToTimeString(order.completedTime));
                         Calendar cal = Calendar.getInstance();
                         cal.setTime(date);
 
@@ -189,46 +185,6 @@ public class SalesSummaryVM extends AndroidViewModel {
         });
     }
 
-    public void getMonthlySalesQuantity(int month, int year, OnQuantityCallback callback) {
-        ordersRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Map<String, Integer> quantityPerProduct = new HashMap<>();
-
-                for (DataSnapshot child : snapshot.getChildren()) {
-                    Orders order = child.getValue(Orders.class);
-                    if (order == null || order.completedTime == null || !order.status) continue;
-
-                    try {
-                        Date date = sdf.parse(order.completedTime);
-                        Calendar cal = Calendar.getInstance();
-                        cal.setTime(date);
-
-                        // Lọc theo tháng & năm
-                        if ((cal.get(Calendar.MONTH) + 1) == month && cal.get(Calendar.YEAR) == year) {
-                            // Duyệt qua danh sách sản phẩm trong đơn
-                            for (int i = 0; i < order.productId.size(); i++) {
-                                String productId = order.productId.get(i);
-                                int qty = order.quantity.get(i);
-
-                                // Cộng dồn số lượng
-                                quantityPerProduct.put(productId,
-                                        quantityPerProduct.getOrDefault(productId, 0) + qty);
-                            }
-                        }
-                    } catch (Exception ignored) {}
-                }
-
-                callback.onResult(quantityPerProduct);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                callback.onError(error.getMessage());
-            }
-        });
-    }
-
 
     // ---------------------- Callback ----------------------
 
@@ -238,10 +194,5 @@ public class SalesSummaryVM extends AndroidViewModel {
 
     public interface OnMonthlyRevenueCallback {
         void onResult(Map<Integer, Integer> revenuePerMonth);
-    }
-
-    public interface OnQuantityCallback {
-        void onResult(Map<String, Integer> data);
-        void onError(String error);
     }
 }

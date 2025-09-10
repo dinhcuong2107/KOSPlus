@@ -1,7 +1,16 @@
 package com.example.kosplus.model;
 
+import androidx.annotation.NonNull;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity(tableName = "users")
 public class Users {
-    public String id;
+
+    @PrimaryKey
+    @NonNull
+    public String id = ""; // đảm bảo không null mặc định
+
     public String imageUrl;
     public String fullname;
     public String sex;
@@ -9,16 +18,18 @@ public class Users {
     public String phone;
     public String password;
     public String role; // Customer Admin Manager Staff
-    public String time;
+    public long time;
     public String token;
     public boolean status;
 
     public Users() {
     }
 
-    public Users(String id, String imageUrl, String fullname, String sex, String dob, String phone, String password, String role, String time, String token, boolean status) {
-        this.imageUrl = imageUrl;
+    public Users(@NonNull String id, String imageUrl, String fullname, String sex, String dob,
+                 String phone, String password, String role, long time,
+                 String token, boolean status) {
         this.id = id;
+        this.imageUrl = imageUrl;
         this.fullname = fullname;
         this.sex = sex;
         this.dob = dob;

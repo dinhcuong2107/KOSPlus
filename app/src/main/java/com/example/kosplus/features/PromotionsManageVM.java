@@ -20,19 +20,22 @@ import androidx.databinding.ObservableField;
 import androidx.lifecycle.ViewModel;
 
 import com.example.kosplus.databinding.CustomDialogCreatePromotionBinding;
+import com.example.kosplus.func.Utils;
 import com.example.kosplus.model.Promotions;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 public class PromotionsManageVM extends ViewModel {
     CustomDialogCreatePromotionBinding binding;
 
     public PromotionsManageVM() {
-
     }
 
     public void onDialogCreatePromotion(View view) {
@@ -112,9 +115,16 @@ public class PromotionsManageVM extends ViewModel {
             } else if (binding.endDate.getText().toString().isEmpty()) {
                 Toast.makeText(view.getContext(), "Vui lòng chọn ngày kết thúc", LENGTH_LONG).show();
             } else {
+                long start = Utils.timeStringToLong("00:00:00 " + binding.startDate.getText().toString());
+                long end = Utils.timeStringToLong("23:59:59 " + binding.endDate.getText().toString());
+                if (start > end) {
+                    Toast.makeText(view.getContext(), "Ngày kết thúc phải sau ngày bắt đầu", LENGTH_LONG).show();
+                    return;
+                }
+
                 DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("KOS Plus").child("Promotions");
                 String UID = databaseReference.push().getKey();
-                Promotions promotion = new Promotions(UID, binding.code.getText().toString(), binding.title.getText().toString(), type.get(), binding.startDate.getText().toString(), binding.endDate.getText().toString(), Integer.parseInt(binding.discount.getText().toString()), true);
+                Promotions promotion = new Promotions(UID, binding.code.getText().toString(), binding.title.getText().toString(), type.get(), start, end, Integer.parseInt(binding.discount.getText().toString()), true);
                 databaseReference.child(UID).setValue(promotion, new DatabaseReference.CompletionListener() {
                     @Override
                     public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
@@ -137,5 +147,4 @@ public class PromotionsManageVM extends ViewModel {
 
         dialog.show();
     }
-
 }

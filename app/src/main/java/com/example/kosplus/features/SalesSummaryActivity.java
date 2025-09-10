@@ -1,24 +1,26 @@
 package com.example.kosplus.features;
 
+import static androidx.recyclerview.widget.LinearLayoutManager.VERTICAL;
+
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.kosplus.R;
 import com.example.kosplus.adapter.CalendarRevenueAdapter;
-import com.example.kosplus.adapter.ProductOrderAdapter;
+import com.example.kosplus.adapter.OrderItemAdapter;
 import com.example.kosplus.databinding.ActivitySalesSummaryBinding;
+import com.example.kosplus.livedata.OrdersLiveData;
+import com.example.kosplus.model.OrderItems;
+import com.example.kosplus.model.ProductSalesTotal;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
@@ -73,38 +75,36 @@ public class SalesSummaryActivity extends AppCompatActivity {
 
         binding.currentmonth.setText("Tháng " + currentMonth + ", " + currentYear);
 
-        viewModel.getMonthlySalesQuantity(currentMonth, currentYear, new SalesSummaryVM.OnQuantityCallback() {
-            @Override
-            public void onResult(Map<String, Integer> data) {
-                if (data == null || data.isEmpty()) {
-                    Log.d("TOP_PRODUCT", "Không có dữ liệu.");
-                    return;
-                }
+        // Quan sát dữ liệu từ LiveData
+        OrdersLiveData orderLiveData = ViewModelProviders.of(this).get(OrdersLiveData.class);
+        // Tính thời gian tháng hiện tại
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        long startOfMonth = calendar.getTimeInMillis();
 
-                // Sắp xếp theo số lượng giảm dần
-                List<Map.Entry<String, Integer>> sortedList = new ArrayList<>(data.entrySet());
-                Collections.sort(sortedList, (e1, e2) -> Integer.compare(e2.getValue(), e1.getValue()));
+        // Cuối tháng
+        calendar.add(Calendar.MONTH, 1);
+        calendar.add(Calendar.MILLISECOND, -1);
+        long endOfMonth = calendar.getTimeInMillis();
 
-                List<String> idList = new ArrayList<>();
-                List<Integer> quantityList = new ArrayList<>();
-
-                for (Map.Entry<String, Integer> entry : sortedList) {
-                    idList.add(entry.getKey());
-                    quantityList.add(entry.getValue());
-                    Log.d("TOP_PRODUCT", "SP: " + entry.getKey() + " | SL: " + entry.getValue());
-                }
-
-                ProductOrderAdapter adapter = new ProductOrderAdapter(idList, quantityList, new ArrayList<>());
-                binding.recyclerView.setLayoutManager(new LinearLayoutManager(SalesSummaryActivity.this));
-                binding.recyclerView.setAdapter(adapter);
-            }
-
-            @Override
-            public void onError(String error) {
-                Log.e("SALES_ERROR", error);
-            }
-        });
-
+        orderLiveData.getProductsAndRevenueInMonth(startOfMonth, endOfMonth)
+                .observe(this, list -> {
+                    if (list != null) {
+                        List<OrderItems> orderItems = new ArrayList<>();
+                        for (ProductSalesTotal pst : list) {
+                            Log.d("REVENUE", "Product: " + pst.productId +
+                                    " | Quantity: " + pst.totalQuantity +
+                                    " | Revenue: " + pst.totalRevenue);
+                            orderItems.add(new OrderItems("orderID", pst.productId, pst.totalQuantity, pst.totalRevenue));
+                        }
+                        binding.recyclerView.setLayoutManager(new LinearLayoutManager(this, VERTICAL, false));
+                        OrderItemAdapter orderItemAdapter = new OrderItemAdapter(orderItems);
+                        binding.recyclerView.setAdapter(orderItemAdapter);
+                    }
+                });
     }
 
     private void drawMonthlyRevenueChart(Map<Integer, Integer> revenuePerMonth, int year) {

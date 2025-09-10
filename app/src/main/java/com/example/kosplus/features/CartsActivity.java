@@ -23,6 +23,7 @@ import com.example.kosplus.adapter.CartAdapter;
 import com.example.kosplus.databinding.ActivityCartsBinding;
 import com.example.kosplus.func.Utils;
 import com.example.kosplus.livedata.ItemCartsLiveData;
+import com.example.kosplus.model.OrderItems;
 import com.example.kosplus.model.Shops;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -52,19 +53,18 @@ public class CartsActivity extends AppCompatActivity {
         // Khởi tạo Adapter
         CartAdapter adapter = new CartAdapter(new ArrayList<>(), new CartAdapter.OnCartDataChangedListener() {
             @Override
-            public void onCartDataChanged(List<String> productIds, List<Integer> quantities, List<Integer> finalPrices) {
+            public void onCartDataChanged(List<OrderItems> orderItemsList) {
                 int total = 0;
-                for (int p : finalPrices) total += p;
-
+                for (OrderItems item : orderItemsList) {
+                    if (item.price > 0) {
+                        total += item.price;
+                    }
+                }
                 binding.done.setText("Mua " + Utils.formatCurrencyVND(total));
 
                 // Nếu muốn dùng khi thanh toán
-                viewModel.setData(productIds, quantities, finalPrices);
+                viewModel.setData(orderItemsList);
 
-                // Nếu muốn dùng khi đặt hàng
-//                this.productIdList = productIds;
-//                this.quantityList = quantities;
-//                this.finalPriceList = finalPrices;
             }
         });
         binding.recyclerView.setAdapter(adapter);
