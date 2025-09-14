@@ -275,7 +275,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                     {
                         if (promotion.type.equals("amount")) {
                             productDetailBinding.promotion.setText(" - " + promotion.discount + " VNĐ");
-                            productDetailBinding.promotionStatus.setText(Utils.longToTimeString(promotion.start_date) + " - " + Utils.longToTimeString(promotion.end_date));
+                            productDetailBinding.promotionStatus.setText(Utils.longToTimeString(promotion.start_date).substring(9) + " - " + Utils.longToTimeString(promotion.end_date).substring(9));
 
                             productDetailBinding.price.setText(Utils.formatCurrencyVND(product.price));
                             productDetailBinding.price.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG);
@@ -283,7 +283,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                             productDetailBinding.finalPrice.setText(Utils.formatCurrencyVND(finalPrice));
                         } else {
                             productDetailBinding.promotion.setText(" - " + promotion.discount+"%");
-                            productDetailBinding.promotionStatus.setText(Utils.longToTimeString(promotion.start_date) + " - " + Utils.longToTimeString(promotion.end_date));
+                            productDetailBinding.promotionStatus.setText(Utils.longToTimeString(promotion.start_date).substring(9) + " - " + Utils.longToTimeString(promotion.end_date).substring(9));
 
                             productDetailBinding.price.setText(Utils.formatCurrencyVND(product.price));
                             productDetailBinding.price.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG);
@@ -295,10 +295,10 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                     } else {
                         productDetailBinding.promotion.setVisibility(GONE);
                         if (timeNow < promotion.start_date) {
-                            productDetailBinding.promotionStatus.setText("Chương trình khuyến mãi chưa bắt đầu: " + promotion.start_date);
+                            productDetailBinding.promotionStatus.setText("Chương trình khuyến mãi chưa bắt đầu: " + Utils.longToTimeString(promotion.start_date).substring(9));
                         }
                         if (timeNow > promotion.end_date) {
-                            productDetailBinding.promotionStatus.setText("Chương trình khuyến mãi đã hết hạn: " + promotion.end_date);
+                            productDetailBinding.promotionStatus.setText("Chương trình khuyến mãi đã hết hạn: " + Utils.longToTimeString(promotion.end_date).substring(9));
                         }
                         if (promotion.status == false) {
                             productDetailBinding.promotionStatus.setText("Chương trình khuyến mãi đã tạm thời bị khóa");

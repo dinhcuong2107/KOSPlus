@@ -24,6 +24,7 @@ import com.example.kosplus.func.Utils;
 import com.example.kosplus.model.Notifications;
 import com.example.kosplus.model.OrderItems;
 import com.example.kosplus.model.Orders;
+import com.example.kosplus.model.Products;
 import com.example.kosplus.model.ProductsRepository;
 import com.example.kosplus.model.PromotionsRepository;
 import com.example.kosplus.model.UsersRepository;
@@ -42,29 +43,6 @@ public class SplassScreenActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         ActivitySplassScreenBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_splass_screen);
-
-
-//        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("KOS Plus").child("OrderItems");
-//
-//        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("KOS Plus").child("Orders");
-//        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot snapshot) {
-//                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-//                    Orders orders = dataSnapshot.getValue(Orders.class);
-//
-//                    databaseReference.child(orders.id).child("productId").removeValue();
-//                    databaseReference.child(orders.id).child("quantity").removeValue();
-//                    databaseReference.child(orders.id).child("price").removeValue();
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError error) {
-//
-//            }
-//        });
-
 
         repository = new ProductsRepository(getApplication());
 
@@ -112,7 +90,7 @@ public class SplassScreenActivity extends AppCompatActivity {
                 .start();
         // Chuyển sau 3 giây
         new Handler().postDelayed(() -> {
-            startActivity(new Intent(this, MainActivity.class));
+            startActivity(new Intent(this, LoginActivity.class));
             finish();
         }, 3000);
     }

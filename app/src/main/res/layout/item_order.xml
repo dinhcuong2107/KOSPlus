@@ -61,7 +61,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Ngày đặt: 26/07/2025"
-                    android:textSize="12sp"
+                    android:textSize="12dp"
                     android:textColor="@android:color/darker_gray" />
 
                 <!-- Địa chỉ giao -->
@@ -70,7 +70,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Địa chỉ: 123 Nguyễn Huệ, Q1"
-                    android:textSize="12sp"
+                    android:textSize="12dp"
                     android:textColor="@android:color/darker_gray"/>
 
                 <!-- Tổng tiền -->

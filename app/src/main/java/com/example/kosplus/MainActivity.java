@@ -104,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
         ViewPagerAdapter adapter = new ViewPagerAdapter(this);
         binding.viewpager.setAdapter(adapter);
         binding.viewpager.setPageTransformer(new DepthPageTransformer());
+
         binding.viewpager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {

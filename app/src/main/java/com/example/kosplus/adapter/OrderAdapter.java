@@ -151,11 +151,13 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ItemOrderVie
                 orderDetailBinding.textCompleted.setClickable(false);
             }
 
-            if (order.confirmedTime > 0 && order.deliveryTime == 0 && order.completedTime == 0) {
+            if (order.confirmedTime > 0 ) {
                 orderDetailBinding.textConfirmed.setText("Đã xác nhận:\n" + Utils.longToTimeString(order.confirmedTime));
                 orderDetailBinding.textConfirmed.setClickable(false);
 
-                orderDetailBinding.textCompleted.setClickable(false);
+                if (order.deliveryTime == 0 && order.completedTime == 0) {
+                    orderDetailBinding.textCompleted.setClickable(false);
+                }
             }
 
             if (order.deliveryTime > 0 ) {

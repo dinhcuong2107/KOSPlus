@@ -1,9 +1,17 @@
 package com.example.kosplus;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.CountDownTimer;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -13,6 +21,7 @@ import androidx.databinding.BindingAdapter;
 import androidx.databinding.ObservableField;
 import androidx.lifecycle.ViewModel;
 
+import com.example.kosplus.databinding.CustomDialogErrorBinding;
 import com.example.kosplus.datalocal.DataLocalManager;
 import com.example.kosplus.func.OneSignalNotification;
 import com.example.kosplus.func.Utils;
@@ -42,14 +51,44 @@ public class MainVM extends ViewModel {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Users users = snapshot.getValue(Users.class);
                 if (!users.status){
-                    Utils.showError(context, "Tài khoản của bạn đã bị định chỉnh\n Bạn sẽ buộc đăng xuất trong vòng 5s");
-                    new CountDownTimer(5000, 1000) { // Đếm ngược từ 5 giây
+
+                    Dialog dialog = new Dialog(context);
+                    dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                    CustomDialogErrorBinding binding = CustomDialogErrorBinding.inflate(LayoutInflater.from(context));
+                    dialog.setContentView(binding.getRoot());
+
+                    Window window = dialog.getWindow();
+                    window.setLayout(WindowManager.LayoutParams.MATCH_PARENT,WindowManager.LayoutParams.WRAP_CONTENT);
+                    window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+                    window.getAttributes().windowAnimations = R.style.DialogAnimationDrop;
+                    window.setGravity(Gravity.CENTER);
+                    dialog.setCancelable(false);
+
+                    binding.textview.setText("Tài khoản của bạn đã bị khóa và buộc đăng xuất sau 5s\n Vui lòng liên hệ chăm sóc khách hàng để được hỗ trợ");
+
+                    binding.cancel.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            dialog.dismiss();
+                        }
+                    });
+
+                    dialog.show();
+
+                    new CountDownTimer(5000, 1000) {
+                        int timeLeft = 5;
+
                         public void onTick(long millisUntilFinished) {
-                            Log.d("Countdown", "Đăng xuất sau: " + millisUntilFinished / 1000 + "s");
+                            binding.textview.setText("Tài khoản của bạn đã bị khóa và buộc đăng xuất sau " + timeLeft + "s\n Vui lòng liên hệ chăm sóc khách hàng để được hỗ trợ");
+                            timeLeft--;
                         }
 
                         public void onFinish() {
-                            Utils.logout(context); // Gọi hàm đăng xuất
+                            if (dialog.isShowing()) {
+                                dialog.dismiss();
+                                Utils.logout(context); // Gọi hàm đăng xuất
+                            }
                         }
                     }.start();
                 }else {

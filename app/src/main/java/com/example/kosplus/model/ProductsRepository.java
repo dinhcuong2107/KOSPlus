@@ -1,7 +1,12 @@
 package com.example.kosplus.model;
 
+import static android.view.View.GONE;
+
 import android.app.Application;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
@@ -130,7 +135,6 @@ public class ProductsRepository {
             return productsDao.getActivePromotions(now.get());
         }
     }
-
     public void preloadProducts() {
         valueEventListener = databaseReference.addValueEventListener(new ValueEventListener() {
             @Override

@@ -5,11 +5,13 @@ import android.app.Application;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 
 import com.example.kosplus.model.ProductSales;
 import com.example.kosplus.model.Products;
 import com.example.kosplus.model.ProductsRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProductsLiveData extends AndroidViewModel {
@@ -49,7 +51,20 @@ public class ProductsLiveData extends AndroidViewModel {
         return repository.getActivePromotions();
     }
     public LiveData<List<Products>> getRandomProducts() {
-        return repository.getRandomProducts();
+        LiveData<List<Products>> liveData = repository.getRandomProducts();
+
+        MediatorLiveData<List<Products>> repeatedLiveData = new MediatorLiveData<>();
+        repeatedLiveData.addSource(liveData, originalList -> {
+            if (originalList == null) return;
+
+            List<Products> newList = new ArrayList<>();
+            for (int i = 0; i < 1000; i++) { // lặp 10 lần
+                newList.addAll(originalList);
+            }
+
+            repeatedLiveData.setValue(newList);
+        });
+        return repeatedLiveData;
     }
 
 }

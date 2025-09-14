@@ -58,7 +58,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
                 GradientDrawable drawable = new GradientDrawable();
                 drawable.setShape(GradientDrawable.RECTANGLE);
                 drawable.setCornerRadius(24);
-                drawable.setColor(Color.parseColor("#ffebdb"));
+                drawable.setColor(Color.parseColor("#FFF2E7"));
                 holder.binding.layout.setBackground(drawable);
                 //   holder.binding.layout.setBackgroundColor(Color.parseColor("#ebfffe"));
             }

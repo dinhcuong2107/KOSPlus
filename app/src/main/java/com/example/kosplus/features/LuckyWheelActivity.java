@@ -44,7 +44,7 @@ public class LuckyWheelActivity extends AppCompatActivity {
     private List<LuckyRewards> list;
     private int targetIndex;
     private CodeScanner mCodeScanner;
-    private List<String> colors = Arrays.asList("#FFB16E", "#FF6F61", "#6EC6FF", "#A3D977", "#D1C4E9", "#F5E79E");
+    private List<String> colors = Arrays.asList("#FFB16E", "#FF6F61", "#6EC6FF", "#54e8a5", "#D1C4E9", "#F5E79E");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

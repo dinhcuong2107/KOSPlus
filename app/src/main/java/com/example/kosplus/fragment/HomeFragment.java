@@ -15,6 +15,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.CompositePageTransformer;
 import androidx.viewpager2.widget.MarginPageTransformer;
 import androidx.viewpager2.widget.ViewPager2;
@@ -23,16 +24,10 @@ import com.example.kosplus.R;
 import com.example.kosplus.adapter.BannerAdapter;
 import com.example.kosplus.adapter.ProductVerticalAdapter;
 import com.example.kosplus.databinding.ActivityHomeFragmentBinding;
+import com.example.kosplus.func.SmoothStackLayoutManager;
 import com.example.kosplus.livedata.BannerLiveData;
 import com.example.kosplus.livedata.ProductsLiveData;
 import com.example.kosplus.model.Banners;
-import com.example.kosplus.model.ProductSales;
-import com.example.kosplus.model.Products;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.onesignal.OneSignal;
 
 import java.util.ArrayList;
@@ -118,15 +113,22 @@ public class HomeFragment extends Fragment {
         ProductsLiveData liveData = ViewModelProviders.of(this).get(ProductsLiveData.class);
 
         // Cấu hình RecyclerView
-        binding.recyclerViewSuggestion.setLayoutManager(new LinearLayoutManager(this.getContext(), LinearLayoutManager.VERTICAL, false));
+        SmoothStackLayoutManager layoutManager = new SmoothStackLayoutManager(this.getContext());
+        layoutManager.setOrientation(RecyclerView.VERTICAL);
+        binding.recyclerViewSuggestion.setLayoutManager(layoutManager);
+        // binding.recyclerViewSuggestion.setLayoutManager(new LinearLayoutManager(this.getContext(), LinearLayoutManager.VERTICAL, false));
         binding.recyclerViewSuggestion.setHasFixedSize(true);
         ProductVerticalAdapter productAdapterSuggestion = new ProductVerticalAdapter(new ArrayList<>(), false);
+        productAdapterSuggestion.toggleExpand(); // mở rộng ngay đầu tiên
         binding.recyclerViewSuggestion.setAdapter(productAdapterSuggestion);
 
         // Quan sát dữ liệu từ LiveData
         liveData.getRandomProducts().observe(this.getViewLifecycleOwner(), key -> {
             if (key != null && !key.isEmpty()) {
                 productAdapterSuggestion.updateData(key, false);
+
+                // scroll tới giữa để infinite mượt
+                binding.recyclerViewSuggestion.scrollToPosition(key.size() / 2);
             } else {
                 binding.layoutSuggestion.setVisibility(View.GONE);
             }
@@ -142,8 +144,22 @@ public class HomeFragment extends Fragment {
         liveData.getActivePromotions().observe(this.getViewLifecycleOwner(), key -> {
             if (key != null && !key.isEmpty()) {
                 productAdapterOnSale.updateData(key, false);
+                if (key.size() > 3) {
+                    binding.expandOnSale.setVisibility(View.VISIBLE);
+                } else {
+                    binding.expandOnSale.setVisibility(View.GONE);
+                }
             } else {
                 binding.layoutOnSale.setVisibility(View.GONE);
+            }
+        });
+
+        binding.expandOnSale.setOnClickListener(v -> {
+            productAdapterOnSale.toggleExpand();
+            if (productAdapterOnSale.isExpanded()) {
+                binding.expandOnSale.setText("Thu nhỏ");
+            } else {
+                binding.expandOnSale.setText("Xem thêm...");
             }
         });
 
@@ -164,9 +180,23 @@ public class HomeFragment extends Fragment {
 
         liveData.getTop10BestSellingProductsOfTime(sevenDaysAgo, now).observe(this.getViewLifecycleOwner(), key -> {
             if (key != null && !key.isEmpty()) {
+                if (key.size() > 3) {
+                    binding.expandTopWeekly.setVisibility(View.VISIBLE);
+                } else {
+                    binding.expandTopWeekly.setVisibility(View.GONE);
+                }
                 productAdapterWeekly.updateData(key, true);
             } else {
                 binding.layoutTopWeekly.setVisibility(View.GONE);
+            }
+        });
+
+        binding.expandTopWeekly.setOnClickListener(v -> {
+            productAdapterWeekly.toggleExpand();
+            if (productAdapterWeekly.isExpanded()) {
+                binding.expandTopWeekly.setText("Thu nhỏ");
+            } else {
+                binding.expandTopWeekly.setText("Xem thêm...");
             }
         });
 
@@ -178,10 +208,24 @@ public class HomeFragment extends Fragment {
 
         liveData.getTopProducts().observe(this.getViewLifecycleOwner(), list -> {
             if (list != null && !list.isEmpty()) {
+                if (list.size() > 3) {
+                    binding.expandTop.setVisibility(View.VISIBLE);
+                } else {
+                    binding.expandTop.setVisibility(View.GONE);
+                }
                 productAdapter.updateData(list, true);
             } else {
                 binding.layoutTop.setVisibility(View.GONE);
                 Log.d("TOP_PRODUCT", "Không có dữ liệu");
+            }
+        });
+
+        binding.expandTop.setOnClickListener(v -> {
+            productAdapter.toggleExpand();
+            if (productAdapter.isExpanded()) {
+                binding.expandTop.setText("Thu nhỏ");
+            } else {
+                binding.expandTop.setText("Xem thêm...");
             }
         });
 

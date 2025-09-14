@@ -15,6 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
+            android:paddingTop="24dp"
             android:orientation="vertical">
             <com.budiyev.android.codescanner.CodeScannerView
                 android:id="@+id/scanner_view"
@@ -42,11 +43,11 @@
                 android:layout_height="40dp"
                 android:layout_marginTop="12dp"
                 android:paddingLeft="12dp"
-                android:paddingRight="12dp"
+                android:paddingRight="24dp"
                 android:drawableTint="@color/white"
                 android:drawableStart="@drawable/rounded_qr_code_24"
                 android:background="@drawable/custom_background_button_agree"
-                android:text="Xác nhận phần thưởng"
+                android:text="   Xác nhận phần thưởng"
                 android:textAllCaps="false"
                 android:textColor="@color/white" />
 

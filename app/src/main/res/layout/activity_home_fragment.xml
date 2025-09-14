@@ -169,14 +169,14 @@
                     android:background="@drawable/custom_background_noborder"
                     android:text="Cơm nước gì chưa người đẹp?"
                     android:textColor="@color/color_title"
-                    android:textSize="18dp"
+                    android:textSize="16dp"
                     android:gravity="center"
                     android:textStyle="bold"/>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recyclerViewSuggestion"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+                    android:layout_height="400dp" />
             </LinearLayout>
 
         <LinearLayout
@@ -187,17 +187,33 @@
             android:padding="8dp"
             android:layout_marginBottom="12dp"
             android:orientation="vertical">
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="4dp"
+                android:orientation="horizontal"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
                 android:background="@drawable/custom_background_noborder"
-                android:gravity="center"
-                android:text="Sản phẩm đang khuyến mãi"
-                android:textColor="@color/color_title"
-                android:textSize="18dp"
-                android:textStyle="bold"/>
+                android:gravity="center">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Sản phẩm đang khuyến mãi"
+                    android:textColor="@color/color_title"
+                    android:textSize="16dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="2dp"
+                    android:textStyle="bold"/>
+                <TextView
+                    android:id="@+id/expandOnSale"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:text="xem thêm..."/>
 
+            </LinearLayout>
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewOnSale"
                 android:layout_width="match_parent"
@@ -212,16 +228,33 @@
             android:padding="8dp"
             android:layout_marginBottom="12dp"
             android:orientation="vertical">
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="4dp"
+                android:orientation="horizontal"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
                 android:background="@drawable/custom_background_noborder"
-                android:gravity="center"
-                android:text="Sản phẩm bán chạy nhất tuần"
-                android:textColor="@color/color_title"
-                android:textSize="18dp"
-                android:textStyle="bold"/>
+                android:gravity="center">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Sản phẩm bán chạy nhất tuần"
+                    android:textColor="@color/color_title"
+                    android:textSize="16dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="2dp"
+                    android:textStyle="bold"/>
+                <TextView
+                    android:id="@+id/expandTopWeekly"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:text="xem thêm..."/>
+
+            </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewTopWeekly"
@@ -235,17 +268,33 @@
             android:background="@drawable/custom_background_grey"
             android:padding="8dp"
             android:orientation="vertical">
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="4dp"
+                android:orientation="horizontal"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
                 android:background="@drawable/custom_background_noborder"
-                android:gravity="center"
-                android:text="Sản phẩm bán chạy nhất"
-                android:textColor="@color/color_title"
-                android:textSize="18dp"
-                android:textStyle="bold"/>
+                android:gravity="center">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Sản phẩm bán chạy nhất"
+                    android:textColor="@color/color_title"
+                    android:textSize="16dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="2dp"
+                    android:textStyle="bold"/>
+                <TextView
+                    android:id="@+id/expandTop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:text="xem thêm..."/>
 
+            </LinearLayout>
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewTop"
                 android:layout_width="match_parent"

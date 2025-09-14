@@ -64,6 +64,4 @@ public interface ProductsDao {
             "AND :now BETWEEN promo.start_date AND promo.end_date " +
             "LIMIT 5")
     LiveData<List<Products>> getActivePromotions(long now);
-
-
 }
